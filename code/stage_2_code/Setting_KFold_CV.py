@@ -5,7 +5,7 @@ Concrete SettingModule class for a specific experimental SettingModule
 # Copyright (c) 2017-Current Jiawei Zhang <jiawei@ifmlab.org>
 # License: TBD
 
-from code.base_class.setting import setting
+from code.stage_2_code.setting import setting
 from sklearn.model_selection import KFold
 import numpy as np
 
@@ -36,8 +36,8 @@ class Setting_KFold_CV(setting):
             self.result.fold_count = fold_count
             self.result.save()
             
-            self.evaluate.data = learned_result
-            score_list.append(self.evaluate.evaluate())
+            self.acc_evaluate.data = learned_result
+            score_list.append(self.acc_evaluate.evaluate())
         
         return np.mean(score_list), np.std(score_list)
 

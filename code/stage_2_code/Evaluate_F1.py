@@ -6,12 +6,13 @@ Concrete Evaluate class for a specific evaluation metrics
 # License: TBD
 
 from code.stage_2_code.evaluate import evaluate
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import f1_score
 
 
-class Evaluate_Accuracy(evaluate):
+class Evaluate_F1(evaluate):
     data = None
     
     def evaluate(self):
-        print('Evaluating Accuracy...')
-        return accuracy_score(self.data['true_y'], self.data['pred_y'])
+        print('Evaluating F1...')
+        # Method set to micro
+        return f1_score(self.data['true_y'], self.data['pred_y'], average='micro')

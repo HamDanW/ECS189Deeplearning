@@ -6,12 +6,12 @@ Concrete Evaluate class for a specific evaluation metrics
 # License: TBD
 
 from code.stage_2_code.evaluate import evaluate
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import recall_score
 
 
-class Evaluate_Accuracy(evaluate):
+class Evaluate_Recall(evaluate):
     data = None
     
     def evaluate(self):
-        print('Evaluating Accuracy...')
-        return accuracy_score(self.data['true_y'], self.data['pred_y'])
+        print('Evaluating Recall...')
+        return recall_score(self.data['true_y'], self.data['pred_y'], average='micro')

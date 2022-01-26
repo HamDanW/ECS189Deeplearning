@@ -12,6 +12,9 @@ Concrete MethodModule class for a specific learning MethodModule
 
 from code.base_class.method import method
 from code.stage_2_code.Evaluate_Accuracy import Evaluate_Accuracy
+from code.stage_2_code.Evaluate_Precision import Evaluate_Precision
+from code.stage_2_code.Evaluate_Recall import Evaluate_Recall
+from code.stage_2_code.Evaluate_F1 import Evaluate_F1
 import torch
 from torch import nn
 import numpy as np
@@ -20,7 +23,7 @@ import numpy as np
 class Method_MLP(method, nn.Module):
     data = None
     # it defines the max rounds to train the model
-    max_epoch = 100
+    max_epoch = 1
     # it defines the learning rate for gradient descent based optimizer for model learning
     learning_rate = 1e-3
 
@@ -107,7 +110,11 @@ class Method_MLP(method, nn.Module):
         # check here for the nn.CrossEntropyLoss doc: https://pytorch.org/docs/stable/generated/torch.nn.CrossEntropyLoss.html
         loss_function = nn.CrossEntropyLoss()
         # for training accuracy investigation purpose
-        accuracy_evaluator = Evaluate_Accuracy('training evaluator', '')
+        # Create evaluation objects that represent evaluation metrics
+        accuracy_evaluator = Evaluate_Accuracy('accuracy training evaluator', '')
+        precision_evaluator = Evaluate_Precision('precision (micro) training evaluator', '')
+        recall_evaluator = Evaluate_Recall('recall training evaluator', '')
+        f1_evaluator = Evaluate_F1('f1 (micro) training evaluator', '')
 
         # it will be an iterative gradient updating process
         # we don't do mini-batch, we use the whole input as one batch
@@ -145,7 +152,11 @@ class Method_MLP(method, nn.Module):
 
             if epoch%100 == 0:
                 accuracy_evaluator.data = {'true_y': y_true, 'pred_y': y_pred.max(1)[1]}
-                print('Epoch:', epoch, 'Accuracy:', accuracy_evaluator.evaluate(), 'Loss:', train_loss.item())
+                precision_evaluator.data = {'true_y': y_true, 'pred_y': y_pred.max(1)[1]}
+                recall_evaluator.data = {'true_y': y_true, 'pred_y': y_pred.max(1)[1]}
+                f1_evaluator.data = {'true_y': y_true, 'pred_y': y_pred.max(1)[1]}
+                print('Epoch:', epoch, 'Accuracy:', accuracy_evaluator.evaluate(), 'Loss:', train_loss.item(), 'Precision: ', precision_evaluator.evaluate(), 'Recall: ', recall_evaluator.evaluate(),
+                 'F1 (Micro): ', f1_evaluator.evaluate())
     
     def test(self, X):
         # do the testing, and result the result
