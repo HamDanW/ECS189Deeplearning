@@ -11,7 +11,7 @@ Concrete MethodModule class for a specific learning MethodModule
 #IF YOU DON'T KNOW WHAT CUDA IS, COMMENT ALL CUDA LINES OUT AND UNCOMMENT THE NON-CUDA LINES.
 
 from code.base_class.method import method
-from code.stage_1_code.Evaluate_Accuracy import Evaluate_Accuracy
+from code.stage_2_code.Evaluate_Accuracy import Evaluate_Accuracy
 import torch
 from torch import nn
 import numpy as np
