@@ -14,18 +14,19 @@ class Dataset_Loader(dataset):
     data = None
     dataset_source_folder_path = None
     dataset_source_file_name = None
-    
+
     def __init__(self, dName=None, dDescription=None):
         super().__init__(dName, dDescription)
-    
+
     def load(self):
         print('loading data...')
         X = []
         y = []
-        f = open(self.dataset_source_folder_path + self.dataset_source_file_name, 'r')
+        file = self.dataset_source_folder_path / self.dataset_source_file_name
+        f = open(file)
         for line in f:
             line = line.strip('\n')
-            #elements = [int(i) for i in line.split(' ')]
+            # elements = [int(i) for i in line.split(' ')]
             # My change
             # Let X be the features (input)
             # Let y be the label    (output)

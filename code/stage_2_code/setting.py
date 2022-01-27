@@ -7,16 +7,17 @@ Base SettingModule class for all experiment settings
 
 import abc
 
-#-----------------------------------------------------
+
+# -----------------------------------------------------
 class setting:
     '''
     SettingModule: Abstract Class
     Entries: 
     '''
-    
+
     setting_name = None
     setting_description = None
-    
+
     dataset = None
     method = None
     result = None
@@ -28,7 +29,7 @@ class setting:
     def __init__(self, sName=None, sDescription=None):
         self.setting_name = sName
         self.setting_description = sDescription
-    
+
     def prepare(self, sDataset, sMethod, sResult, aEvaluate, pEvaluate, rEvaluate, fEvaluate):
         self.dataset = sDataset
         self.method = sMethod
@@ -40,9 +41,11 @@ class setting:
 
     def print_setup_summary(self):
         print('dataset:', self.dataset.dataset_name, ', method:', self.method.method_name,
-              ', setting:', self.setting_name, ', result:', self.result.result_name, ', accuracy evaluation:', self.acc_evaluate.evaluate_name, 
-                ', precision (micro) evaluation:', self.pre_evaluate.evaluate_name, ', recall (micro) evaluation:', self.recall_evaluate.evaluate_name,
-                ', f1 evaluation (micro):', self.f1_evaluate.evaluate_name)
+              ', setting:', self.setting_name, ', result:', self.result.result_name, ', accuracy evaluation:',
+              self.acc_evaluate.evaluate_name,
+              ', precision (micro) evaluation:', self.pre_evaluate.evaluate_name, ', recall (micro) evaluation:',
+              self.recall_evaluate.evaluate_name,
+              ', f1 evaluation (micro):', self.f1_evaluate.evaluate_name)
 
     @abc.abstractmethod
     def load_run_save_evaluate(self):
