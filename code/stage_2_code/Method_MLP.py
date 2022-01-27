@@ -41,7 +41,8 @@ class Method_MLP(method, nn.Module):
         # self.fc_layer_1 = nn.Linear(784, 784).cuda()
 
         # NON CUDA version
-        self.fc_layer_1 = nn.Linear(784, 200)
+        initial = 784
+        self.fc_layer_1 = nn.Linear(initial, initial)
 
         # Original Code under
         # self.fc_layer_1 = nn.Linear(4, 4)
@@ -61,10 +62,17 @@ class Method_MLP(method, nn.Module):
         # Non CUDA version of code
 
         # Russell Chien: hidden layer(s), make sure to update forward() if adding new layer
-        self.hidden_layer_1 = nn.Linear(200, 100)
-        self.activation_hidden_layer_1 = nn.ReLU()
+        # self.hidden_layer_1 = nn.Linear(200, 100)
+        # self.activation_hidden_layer_1 = nn.ReLU()
 
-        self.fc_layer_2 = nn.Linear(100, 10)
+        factor = 2
+        next_val = int(initial / factor)
+        for i in range(3):
+            self.hidden_layer = nn.Linear(initial, next_val)
+            self.activation_hidden_layer = nn.ReLU()
+            next_val = int(initial / factor)
+
+        self.fc_layer_2 = nn.Linear(next_val, 10)
         # Original Code
         # self.fc_layer_2 = nn.Linear(4, 2)
         # check here for nn.Softmax doc: https://pytorch.org/docs/stable/generated/torch.nn.Softmax.html
@@ -96,13 +104,15 @@ class Method_MLP(method, nn.Module):
         # we do softmax along dim=1 to get the normalized classification probability distributions for each instance
 
         # Russell Chien: hidden layer(s)
-        hl_1 = self.activation_hidden_layer_1(self.hidden_layer_1(h))
+        # hl_1 = self.activation_hidden_layer_1(self.hidden_layer_1(h))
+        hl = self.activation_hidden_layer(self.hidden_layer(h))
 
         # CUDA version
         # y_pred = self.activation_func_2(self.fc_layer_2(h)).cuda()
 
         # Non CUDA version
-        y_pred = self.activation_func_2(self.fc_layer_2(hl_1))
+        # y_pred = self.activation_func_2(self.fc_layer_2(hl_1))
+        y_pred = self.activation_func_2(self.fc_layer_2(hl))
 
         return y_pred
 
