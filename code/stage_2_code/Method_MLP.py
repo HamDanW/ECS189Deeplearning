@@ -36,35 +36,22 @@ class Method_MLP(method, nn.Module):
         # check here for nn.Linear doc: https://pytorch.org/docs/stable/generated/torch.nn.Linear.html
 
         # Donald Chan: Adjusted layer to account for training set. 784 features per row
-        # My code
         # CUDA Version
         # self.fc_layer_1 = nn.Linear(784, 784).cuda()
-
-        # NON CUDA version
+        # Non CUDA version
         initial = 784
         self.fc_layer_1 = nn.Linear(initial, initial)
 
-        # Original Code under
-        # self.fc_layer_1 = nn.Linear(4, 4)
         # check here for nn.ReLU doc: https://pytorch.org/docs/stable/generated/torch.nn.ReLU.html
-        # self.activation_func_1 = nn.ReLU()
 
-        # My Code
         # CUDA version of code
         # self.activation_func_1 = nn.ReLU().cuda()
         # Non CUDA version
         self.activation_func_1 = nn.ReLU()
 
-        # My code
-        # Donald Chan: Layer 2 should output nx2 matrix, so it can be used in softmax function. n is the size of the input
-        # CUDA version of code
-        # self.fc_layer_2 = nn.Linear(784, 10).cuda()
-        # Non CUDA version of code
-
-        # Russell Chien: hidden layer(s), make sure to update forward() if adding new layer
+        # Russell Chien: hidden layer(s) implementation, haven't tried CUDA
         # self.hidden_layer_1 = nn.Linear(200, 100)
         # self.activation_hidden_layer_1 = nn.ReLU()
-
         factor = 2
         next_val = int(initial / factor)
         for i in range(3):
@@ -72,16 +59,14 @@ class Method_MLP(method, nn.Module):
             self.activation_hidden_layer = nn.ReLU()
             next_val = int(initial / factor)
 
+        # Donald Chan: Layer 2 should output nx2 matrix, so it can be used in softmax function. n is the size of the input
+        # CUDA version of code
+        # self.fc_layer_2 = nn.Linear(784, 10).cuda()
+        # Non CUDA version of code
         self.fc_layer_2 = nn.Linear(next_val, 10)
-        # Original Code
-        # self.fc_layer_2 = nn.Linear(4, 2)
-        # check here for nn.Softmax doc: https://pytorch.org/docs/stable/generated/torch.nn.Softmax.html
-        # self.activation_func_2 = nn.Softmax(dim=1)
 
-        # My code
         # CUDA version
         # self.activation_func_2 = nn.Softmax(dim=1).cuda()
-
         # Non CUDA version
         self.activation_func_2 = nn.Softmax(dim=1)
 
@@ -91,8 +76,7 @@ class Method_MLP(method, nn.Module):
     def forward(self, x):
         '''Forward propagation'''
         # hidden layer embeddings
-        # Original
-        # h = self.activation_func_1(self.fc_layer_1(x))
+
         # CUDA version of code
         # h = self.activation_func_1(self.fc_layer_1(x)).cuda()
         # Non CUDA version of code
@@ -103,13 +87,12 @@ class Method_MLP(method, nn.Module):
         # n (denotes the input instance number): 0th dimension; 2 (denotes the class number): 1st dimension
         # we do softmax along dim=1 to get the normalized classification probability distributions for each instance
 
-        # Russell Chien: hidden layer(s)
+        # Russell Chien: hidden layer(s) implementation, haven't tried CUDA
         # hl_1 = self.activation_hidden_layer_1(self.hidden_layer_1(h))
         hl = self.activation_hidden_layer(self.hidden_layer(h))
 
         # CUDA version
         # y_pred = self.activation_func_2(self.fc_layer_2(h)).cuda()
-
         # Non CUDA version
         # y_pred = self.activation_func_2(self.fc_layer_2(hl_1))
         y_pred = self.activation_func_2(self.fc_layer_2(hl))
@@ -138,10 +121,9 @@ class Method_MLP(method, nn.Module):
         # you can try to split X and y into smaller-sized batches by yourself
         for epoch in range(self.max_epoch):  # you can do an early stop if self.max_epoch is too much...
             # get the output, we need to covert X into torch.tensor so pytorch algorithm can operate on it
-            optimizer.zero_grad()
 
             # Convert tensors to CUDA for faster computation
-            # Comment out if you don't know what CUDA is
+            # CUDA version
             # y_pred = self.forward(torch.FloatTensor(np.array(X)).cuda()).cuda()
             # y_true = torch.LongTensor(np.array(y)).cuda()
 
@@ -155,13 +137,14 @@ class Method_MLP(method, nn.Module):
 
             # check here for the loss.backward doc: https://pytorch.org/docs/stable/generated/torch.Tensor.backward.html
             # do the error backpropagation to calculate the gradients
+            optimizer.zero_grad()
             train_loss.backward()
             # check here for the opti.step doc: https://pytorch.org/docs/stable/optim.html
             # update the variables according to the optimizer and the gradients calculated by the above loss.backward function
             optimizer.step()
 
+            # for CUDA, comment out if not using CUDA
             # Convert tensors to CPU for numpy functions
-            # Comment out if not using CUDA
             # y_pred = y_pred.cpu()
             # y_true = y_true.cpu()
 
@@ -173,8 +156,6 @@ class Method_MLP(method, nn.Module):
                 print('Epoch:', epoch, 'Accuracy:', accuracy_evaluator.evaluate(), 'Loss:', train_loss.item(),
                       'Precision: ', precision_evaluator.evaluate(), 'Recall: ', recall_evaluator.evaluate(),
                       'F1 (Micro): ', f1_evaluator.evaluate())
-
-                # print('Epoch:', epoch, 'Accuracy:', accuracy_evaluator.evaluate(), 'Loss:', train_loss.item())
 
     def test(self, X):
         # do the testing, and result the result
@@ -192,7 +173,6 @@ class Method_MLP(method, nn.Module):
         print('--start training...')
         self.train(self.data['train']['X'], self.data['train']['y'])
         print('--start testing...')
-        # My code
         # CUDA Version
         # pred_y = self.test(self.data['test']['X']).cuda()
         # Non CUDA Version
