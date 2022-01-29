@@ -39,6 +39,7 @@ class Method_MLP(method, nn.Module):
         # CUDA Version
         # self.fc_layer_1 = nn.Linear(784, 784).cuda()
         # Non CUDA version
+        # self.fc_layer_1 = nn.Linear(784, 200)
         initial = 784
         self.fc_layer_1 = nn.Linear(initial, initial)
 
@@ -63,6 +64,7 @@ class Method_MLP(method, nn.Module):
         # CUDA version of code
         # self.fc_layer_2 = nn.Linear(784, 10).cuda()
         # Non CUDA version of code
+        # self.fc_layer_2 = nn.Linear(100, 10)
         self.fc_layer_2 = nn.Linear(next_val, 10)
 
         # CUDA version
@@ -112,9 +114,9 @@ class Method_MLP(method, nn.Module):
         # for training accuracy investigation purpose
         # Create evaluation objects that represent evaluation metrics
         accuracy_evaluator = Evaluate_Accuracy('accuracy training evaluator', '')
-        precision_evaluator = Evaluate_Precision('precision (micro) training evaluator', '')
+        precision_evaluator = Evaluate_Precision('precision training evaluator', '')
         recall_evaluator = Evaluate_Recall('recall training evaluator', '')
-        f1_evaluator = Evaluate_F1('f1 (micro) training evaluator', '')
+        f1_evaluator = Evaluate_F1('f1 training evaluator', '')
 
         # it will be an iterative gradient updating process
         # we don't do mini-batch, we use the whole input as one batch

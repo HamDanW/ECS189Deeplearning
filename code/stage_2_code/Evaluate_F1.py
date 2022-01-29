@@ -14,5 +14,7 @@ class Evaluate_F1(evaluate):
     
     def evaluate(self):
         print('Evaluating F1...')
-        # Method set to micro
+        # Method set to micro weighting
         return f1_score(self.data['true_y'], self.data['pred_y'], average='micro')
+        # Method set to macro weighting
+        # return f1_score(self.data['true_y'], self.data['pred_y'], average='macro')
