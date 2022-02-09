@@ -1,26 +1,25 @@
+from code.stage_3_code.Method_CNN import Method_CNN
+from code.stage_3_code.Evaluate_Accuracy import Evaluate_Accuracy
 from code.stage_3_code.Dataset_Loader import Dataset_Loader
 
-import numpy as np
 import torch
+import torch.nn as nn
+
+import numpy as np
 
 from pathlib import Path
 
+
+net = Method_CNN('CNN Model', '')
+
 data_folder_path = 'data/stage_3_data/'
 
-CIFAR_obj = Dataset_Loader('train', '')
-CIFAR_obj.dataset_source_folder_path = Path(data_folder_path)
-CIFAR_obj.dataset_source_file_name = 'CIFAR'
+MNIST_data_obj = Dataset_Loader('train', '')
+MNIST_data_obj.dataset_source_folder_path = Path(data_folder_path)
+MNIST_data_obj.dataset_source_file_name = 'MNIST'
 
-MNIST_obj = Dataset_Loader('train', '')
-MNIST_obj.dataset_source_folder_path = Path(data_folder_path)
-MNIST_obj.dataset_source_file_name = 'MNIST'
+train = MNIST_data_obj.load('train')
+test = MNIST_data_obj.load('test')
+net.data = {'train': train, 'test': test}
 
-ORL_obj = Dataset_Loader('train', '')
-ORL_obj.dataset_source_folder_path = Path(data_folder_path)
-ORL_obj.dataset_source_file_name = 'ORL'
-
-# loads datasets 
-CIFAR_obj.load()
-MNIST_obj.load()
-ORL_obj.load()
-
+net.run()

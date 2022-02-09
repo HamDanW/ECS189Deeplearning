@@ -1,5 +1,4 @@
 from code.base_class.dataset import dataset
-
 import pickle
 import matplotlib.pyplot as plt
 
@@ -12,21 +11,17 @@ class Dataset_Loader(dataset):
     def __init__(self, dName=None, dDescription=None):
         super().__init__(dName, dDescription)
 
-    def load(self):
+    def load(self, dType):
         print('loading data...')
-        file_name = self.dataset_source_folder_path / self.dataset_source_file_name
-        f = open(file_name, 'rb')  # or change MNIST to other dataset names
+        X = []
+        y = []
+        file = self.dataset_source_folder_path / self.dataset_source_file_name
+        f = open(file, 'rb')
         data = pickle.load(f)
-        f.close()
 
-        print('training set size:', len(data['train']), 'testing set size:', len(data['test']))
+        print(dType, ' set size:', len(data[dType]))
 
-        # prints out training data using matplotlib
-        '''
-        for pair in data['train']:
-            # for pair in data['test']:
-            plt.imshow(pair['image'], cmap="Greys")
-            plt.show()
-            print(pair['label'])
-        '''
-
+        for pair in data[dType]:
+            X.append(pair['image'])
+            y.append(pair['label'])
+        return {'X': X, 'y': y}
