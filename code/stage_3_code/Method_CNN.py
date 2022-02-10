@@ -5,14 +5,18 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 
+import numpy as np
+
 
 class Method_CNN(method, nn.Module):
     data = None
     learning_rate = 1e-5
+    max_epoch = 10
 
     def __init__(self, mName, mDescription):
         method.__init__(self, mName, mDescription)
         nn.Module.__init__(self)
+        # update for different dataset
         self.conv1 = nn.Conv2d(3, 6, 5)
         self.pool = nn.MaxPool2d(2, 2)
         self.conv2 = nn.Conv2d(6, 16, 5)
@@ -29,32 +33,21 @@ class Method_CNN(method, nn.Module):
         x = self.fc3(x)
         return x
 
-    def train(self, X):
+    def train(self, X, y):
         # https://pytorch.org/tutorials/beginner/blitz/cifar10_tutorial.html
-        criterion = nn.CrossEntropyLoss()
+        loss_function = nn.CrossEntropyLoss()
         optimizer = optim.SGD(self.parameters(), lr=self.learning_rate, momentum=0.9)
 
-        for epoch in range(2):  # loop over the dataset multiple times
+        for epoch in range (self.max_epoch):
+            y_pred = self.forward(torch.FloatTensor(np.array(X)))
+            y_true = torch.LongTensor(np.array(y))
 
-            running_loss = 0.0
-            for i, data in enumerate(X, 0):
-                # get the inputs; data is a list of [inputs, labels]
-                inputs, labels = data
+            train_loss = loss_function(y_pred, y_true)
 
-                # zero the parameter gradients
-                optimizer.zero_grad()
+            optimizer.zero_grad()
+            train_loss.backward()
 
-                # forward + backward + optimize
-                outputs = Method_CNN(inputs)
-                loss = criterion(outputs, labels)
-                loss.backward()
-                optimizer.step()
-
-                # print statistics
-                running_loss += loss.item()
-                if i % 2000 == 1999:  # print every 2000 mini-batches
-                    print(f'[{epoch + 1}, {i + 1:5d}] loss: {running_loss / 2000:.3f}')
-                    running_loss = 0.0
+            optimizer.step()
 
         print('Finished Training')
 
@@ -64,4 +57,4 @@ class Method_CNN(method, nn.Module):
     def run(self):
         print('method running...')
         print('--start training...')
-        self.train(self.data)
+        self.train(self.data['train']['X'], self.data['train']['y'])
