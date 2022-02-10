@@ -15,17 +15,18 @@ class Setting_KFold_CV(setting):
     def load_run_save_evaluate(self):
         
         # load dataset
+        # dataset has form: {'train': {'X': trainX, 'y': trainy}, 'test': {'X': testX, 'y': testy}}
         loaded_data = self.dataset.load()
         
         kf = KFold(n_splits=self.fold, shuffle=True)
         
         fold_count = 0
         score_list = []
-        for train_index, test_index in kf.split(loaded_data['X']):
+        for train_index, test_index in kf.split(loaded_data['train']['X']):
             fold_count += 1
             print('************ Fold:', fold_count, '************')
-            X_train, X_test = np.array(loaded_data['X'])[train_index], np.array(loaded_data['X'])[test_index]
-            y_train, y_test = np.array(loaded_data['y'])[train_index], np.array(loaded_data['y'])[test_index]
+            X_train, X_test = np.array(loaded_data['train']['X'])[train_index], np.array(loaded_data['train']['X'])[test_index]
+            y_train, y_test = np.array(loaded_data['train']['y'])[train_index], np.array(loaded_data['train']['y'])[test_index]
         
             # run MethodModule
             self.method.data = {'train': {'X': X_train, 'y': y_train}, 'test': {'X': X_test, 'y': y_test}}

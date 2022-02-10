@@ -12,7 +12,7 @@ class Method_CNN(method, nn.Module):
     channels = 3
     data = None
     # it defines the max rounds to train the model
-    max_epoch = 100
+    max_epoch = 10
     # it defines the learning rate for gradient descent based optimizer for model learning
     learning_rate = 1e-5
 

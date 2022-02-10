@@ -25,7 +25,7 @@ class Dataset_Loader(dataset):
         trainy = []
         testX = []
         testy = []
-        finalTrain = []
+
         file = self.dataset_source_folder_path / self.dataset_source_file_name
         f = open(file, 'rb')
         data = pickle.load(f)
