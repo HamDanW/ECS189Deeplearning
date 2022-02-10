@@ -6,3 +6,10 @@
 /dataSources.local.xml
 # Editor-based HTTP Client requests
 /httpRequests/
+
+data/stage_2_data/test.csv
+data/stage_2_data/train.csv
+data/stage_3_data/CIFAR
+data/stage_3_data/MNIST
+data/stage_3_data/ORL
+.DS_Store
