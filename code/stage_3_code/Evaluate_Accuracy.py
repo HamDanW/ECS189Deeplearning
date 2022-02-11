@@ -5,7 +5,7 @@ Concrete Evaluate class for a specific evaluation metrics
 # Copyright (c) 2017-Current Jiawei Zhang <jiawei@ifmlab.org>
 # License: TBD
 
-from code.stage_2_code.evaluate import evaluate
+from code.stage_3_code.evaluate import evaluate
 from sklearn.metrics import accuracy_score
 
 

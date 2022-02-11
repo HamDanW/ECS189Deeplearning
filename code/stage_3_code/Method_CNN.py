@@ -5,10 +5,14 @@ from torch.nn import functional as F
 import numpy as np
 
 from code.stage_3_code.Evaluate_Accuracy import Evaluate_Accuracy
+from code.stage_3_code.Evaluate_Precision import Evaluate_Precision
+from code.stage_3_code.Evaluate_Recall import Evaluate_Recall
+from code.stage_3_code.Evaluate_F1 import Evaluate_F1
+
 
 class Method_CNN(method, nn.Module):
-    #Channels an image has. 1 for gray images. 3 for RGB.
-    #Need to manually set
+    # Channels an image has. 1 for gray images. 3 for RGB.
+    # Need to manually set
     channels = 3
     data = None
     # it defines the max rounds to train the model
@@ -20,7 +24,7 @@ class Method_CNN(method, nn.Module):
     #device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     device = torch.device('cpu')
 
-    #From Pytorch Example
+    # From Pytorch Example
     def __init__(self, mName, mDescription):
         method.__init__(self, mName, mDescription)
         nn.Module.__init__(self)
@@ -34,9 +38,9 @@ class Method_CNN(method, nn.Module):
         self.fc4 = nn.Linear(100, 10).to(self.device)
         #self.softmax = nn.Softmax(dim=1)
 
-    #From Pytorch Example
-    def forward(self,x):
-        #x = x.unsqueeze(0)
+    # From Pytorch Example
+    def forward(self, x):
+        # x = x.unsqueeze(0)
         # x = torch.reshape(x, (self.batch_size,x.size(dim=1), x.size(dim=2), x.size(dim=3)))
         conv1 = self.pool(F.relu(self.conv1(x))).to(self.device)
         conv2 = self.pool(F.relu(self.conv2(conv1))).to(self.device)
@@ -53,7 +57,7 @@ class Method_CNN(method, nn.Module):
         # X has form: [[image1][image2]...[image n]]
         # y has form: [label1, label2, ..., label n]
 
-        #Optimizer
+        # Optimizer
         optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
         #optimizer = torch.optim.SGD(self.parameters(), lr=0.001, momentum=0.9)
         
@@ -80,6 +84,9 @@ class Method_CNN(method, nn.Module):
 
             # Create evaluation objects that represent evaluation metrics
             accuracy_evaluator = Evaluate_Accuracy('accuracy training evaluator', '')
+            precision_evaluator = Evaluate_Precision('precision (micro) training evaluator', '')
+            recall_evaluator = Evaluate_Recall('recall training evaluator', '')
+            f1_evaluator = Evaluate_F1('f1 (micro) training evaluator', '')
 
             # check here for the loss.backward doc: https://pytorch.org/docs/stable/generated/torch.Tensor.backward.html
             # do the error backpropagation to calculate the gradients
@@ -104,7 +111,7 @@ class Method_CNN(method, nn.Module):
         return y_pred.max(1)[1]
 
     def run(self):
-        #data has form:
+        # data has form:
         # {'train': {'X': trainX, 'y': trainy}, 'test': {'X': testX, 'y': testy}}
         print('method running...')
         print('--start training...')

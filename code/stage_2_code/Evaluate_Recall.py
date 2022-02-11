@@ -14,4 +14,7 @@ class Evaluate_Recall(evaluate):
     
     def evaluate(self):
         print('Evaluating Recall...')
+        # Method set to micro weighting
         return recall_score(self.data['true_y'], self.data['pred_y'], average='micro')
+        # Method set to macro weighting
+        # return recall_score(self.data['true_y'], self.data['pred_y'], average='macro')
