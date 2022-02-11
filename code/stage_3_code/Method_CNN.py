@@ -5,18 +5,22 @@ from torch.nn import functional as F
 import numpy as np
 
 from code.stage_3_code.Evaluate_Accuracy import Evaluate_Accuracy
+from code.stage_3_code.Evaluate_Precision import Evaluate_Precision
+from code.stage_3_code.Evaluate_Recall import Evaluate_Recall
+from code.stage_3_code.Evaluate_F1 import Evaluate_F1
+
 
 class Method_CNN(method, nn.Module):
-    #Channels an image has. 1 for gray images. 3 for RGB.
-    #Need to manually set
+    # Channels an image has. 1 for gray images. 3 for RGB.
+    # Need to manually set
     channels = 3
     data = None
     # it defines the max rounds to train the model
-    max_epoch = 10
+    max_epoch = 2
     # it defines the learning rate for gradient descent based optimizer for model learning
     learning_rate = 1e-5
 
-    #From Pytorch Example
+    # From Pytorch Example
     def __init__(self, mName, mDescription):
         method.__init__(self, mName, mDescription)
         nn.Module.__init__(self)
@@ -27,19 +31,19 @@ class Method_CNN(method, nn.Module):
         self.fc1 = nn.Linear(16 * 5 * 5, 120)
         self.fc2 = nn.Linear(120, 84)
         self.fc3 = nn.Linear(84, 10)
-        #self.softmax = nn.Softmax(dim=1)
+        # self.softmax = nn.Softmax(dim=1)
 
-    #From Pytorch Example
-    def forward(self,x):
-        #x = x.unsqueeze(0)
+    # From Pytorch Example
+    def forward(self, x):
+        # x = x.unsqueeze(0)
         # x = torch.reshape(x, (self.batch_size,x.size(dim=1), x.size(dim=2), x.size(dim=3)))
         conv1 = self.pool(F.relu(self.conv1(x)))
         conv2 = self.pool(F.relu(self.conv2(conv1)))
-        flat = torch.flatten(conv2, 1) # flatten all dimensions except batch
+        flat = torch.flatten(conv2, 1)  # flatten all dimensions except batch
         activation1 = F.relu(self.fc1(flat))
         activation2 = F.relu(self.fc2(activation1))
         activation3 = self.fc3(activation2)
-        #y_pred = self.softmax(activation3)
+        # y_pred = self.softmax(activation3)
         y_pred = activation3
         return y_pred
 
@@ -47,12 +51,12 @@ class Method_CNN(method, nn.Module):
         # X has form: [[image1][image2]...[image n]]
         # y has form: [label1, label2, ..., label n]
 
-        #Optimizer
+        # Optimizer
         optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
         loss_function = nn.CrossEntropyLoss()
 
-        #Transform X to have form [Channel, Height, Width]
-        #transformed = torch.permute(torch.FloatTensor(np.array(X)), (2,0,1))
+        # Transform X to have form [Channel, Height, Width]
+        # transformed = torch.permute(torch.FloatTensor(np.array(X)), (2,0,1))
 
         for epoch in range(self.max_epoch):  # you can do an early stop if self.max_epoch is too much...
             # check here for the gradient init doc: https://pytorch.org/docs/stable/generated/torch.optim.Optimizer.zero_grad.html
@@ -71,6 +75,9 @@ class Method_CNN(method, nn.Module):
 
             # Create evaluation objects that represent evaluation metrics
             accuracy_evaluator = Evaluate_Accuracy('accuracy training evaluator', '')
+            precision_evaluator = Evaluate_Precision('precision (micro) training evaluator', '')
+            recall_evaluator = Evaluate_Recall('recall training evaluator', '')
+            f1_evaluator = Evaluate_F1('f1 (micro) training evaluator', '')
 
             # check here for the loss.backward doc: https://pytorch.org/docs/stable/generated/torch.Tensor.backward.html
             # do the error backpropagation to calculate the gradients
@@ -82,8 +89,12 @@ class Method_CNN(method, nn.Module):
 
             if epoch % 100 == 0:
                 accuracy_evaluator.data = {'true_y': y_true, 'pred_y': y_pred.max(1)[1]}
-                print('Epoch:', epoch, 'Accuracy:', accuracy_evaluator.evaluate(), 'Loss:', train_loss.item())
-
+                precision_evaluator.data = {'true_y': y_true, 'pred_y': y_pred.max(1)[1]}
+                recall_evaluator.data = {'true_y': y_true, 'pred_y': y_pred.max(1)[1]}
+                f1_evaluator.data = {'true_y': y_true, 'pred_y': y_pred.max(1)[1]}
+                print('Epoch:', epoch, 'Accuracy:', accuracy_evaluator.evaluate(), 'Loss:', train_loss.item(),
+                      'Precision: ', precision_evaluator.evaluate(), 'Recall: ', recall_evaluator.evaluate(),
+                      'F1 (Micro): ', f1_evaluator.evaluate())
 
     def test(self, X):
         # do the testing, and result the result
@@ -94,7 +105,7 @@ class Method_CNN(method, nn.Module):
         return y_pred.max(1)[1]
 
     def run(self):
-        #data has form:
+        # data has form:
         # {'train': {'X': trainX, 'y': trainy}, 'test': {'X': testX, 'y': testy}}
         print('method running...')
         print('--start training...')
