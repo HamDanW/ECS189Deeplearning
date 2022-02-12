@@ -3,9 +3,6 @@ from code.stage_3_code.Method_CNN import Method_CNN
 from code.stage_3_code.Result_Saver import Result_Saver
 from code.stage_3_code.Setting_KFold_CV import Setting_KFold_CV
 from code.stage_3_code.Evaluate_Accuracy import Evaluate_Accuracy
-from code.stage_3_code.Evaluate_Precision import Evaluate_Precision
-from code.stage_3_code.Evaluate_Recall import Evaluate_Recall
-from code.stage_3_code.Evaluate_F1 import Evaluate_F1
 import numpy as np
 import torch
 
@@ -33,8 +30,8 @@ data_obj.dataset_source_folder_path = Path(data_folder_path)
 data_obj.dataset_source_file_name = data_file_name
 
 # CUDA
-#device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-device = torch.device('cpu')
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+#device = torch.device('cpu')
 
 
 # Initialize CNN Object
@@ -58,7 +55,19 @@ method_obj.data = data
 method_obj.to(device)
 
 
-method_obj.run()
+test_results = method_obj.run()
+
+
+predictions = test_results['pred_y']
+expected = test_results['true_y']
+
+score = 0
+
+for i in range(0, len(predictions)):
+    if(predictions[i] == expected[i]):
+        score += 1
+
+print('Overall Accuracy: ' + str(score/len(predictions)))
 
 # Russell Chien: Put your folder path here for results
 result_folder_path = Path('result/stage_3_result/')
@@ -72,10 +81,7 @@ setting_obj = Setting_KFold_CV('k fold cross validation', '')
 # setting_obj = Setting_Tra
 # in_Test_Split('train test split', '')
 
-evaluate_obj_acc = Evaluate_Accuracy('accuracy', '')
-evaluate_obj_prec = Evaluate_Precision('precision', '')
-evaluate_obj_recall = Evaluate_Recall('recall', '')
-evaluate_obj_F1 = Evaluate_F1('F1', '')
+evaluate_obj = Evaluate_Accuracy('accuracy', '')
 # ------------------------------------------------------
 
 # ---- running section ---------------------------------

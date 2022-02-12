@@ -30,11 +30,12 @@ class setting:
         self.setting_name = sName
         self.setting_description = sDescription
 
-    def prepare(self, sDataset, sMethod, sResult, aEvaluate, pEvaluate, rEvaluate, fEvaluate):
+    def prepare(self, sDataset, sMethod, sResult, aEvaluate):
         self.dataset = sDataset
         self.method = sMethod
         self.result = sResult
         self.acc_evaluate = aEvaluate
+
 
     def print_setup_summary(self):
         print('dataset:', self.dataset.dataset_name, ', method:', self.method.method_name,

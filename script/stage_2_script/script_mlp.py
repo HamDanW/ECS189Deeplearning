@@ -3,9 +3,6 @@ from code.stage_2_code.Method_MLP import Method_MLP
 from code.stage_2_code.Result_Saver import Result_Saver
 from code.stage_2_code.Setting_KFold_CV import Setting_KFold_CV
 from code.stage_2_code.Evaluate_Accuracy import Evaluate_Accuracy
-from code.stage_2_code.Evaluate_Precision import Evaluate_Precision
-from code.stage_2_code.Evaluate_Recall import Evaluate_Recall
-from code.stage_2_code.Evaluate_F1 import Evaluate_F1
 import numpy as np
 import torch
 
@@ -69,16 +66,12 @@ setting_obj = Setting_KFold_CV('k fold cross validation', '')
 # setting_obj = Setting_Tra
 # in_Test_Split('train test split', '')
 
-evaluate_obj_acc = Evaluate_Accuracy('accuracy', '')
-evaluate_obj_prec = Evaluate_Precision('precision', '')
-evaluate_obj_recall = Evaluate_Recall('recall', '')
-evaluate_obj_F1 = Evaluate_F1('F1', '')
-
+evaluate_obj = Evaluate_Accuracy('accuracy', '')
 # ------------------------------------------------------
 
 # ---- running section ---------------------------------
 print('************ Start ************')
-setting_obj.prepare(train_data_obj, method_obj, result_obj, evaluate_obj_acc, evaluate_obj_prec, evaluate_obj_recall, evaluate_obj_F1)
+setting_obj.prepare(train_data_obj, method_obj, result_obj, evaluate_obj, evaluate_obj, evaluate_obj, evaluate_obj)
 setting_obj.print_setup_summary()
 mean_score, std_score = setting_obj.load_run_save_evaluate()
 print('************ Overall Performance ************')

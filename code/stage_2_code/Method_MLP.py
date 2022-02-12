@@ -23,7 +23,7 @@ import numpy as np
 class Method_MLP(method, nn.Module):
     data = None
     # it defines the max rounds to train the model
-    max_epoch = 1000
+    max_epoch = 100
     # it defines the learning rate for gradient descent based optimizer for model learning
     learning_rate = 1e-5
 
@@ -39,7 +39,6 @@ class Method_MLP(method, nn.Module):
         # CUDA Version
         # self.fc_layer_1 = nn.Linear(784, 784).cuda()
         # Non CUDA version
-        # self.fc_layer_1 = nn.Linear(784, 200)
         initial = 784
         self.fc_layer_1 = nn.Linear(initial, initial)
 
@@ -55,7 +54,7 @@ class Method_MLP(method, nn.Module):
         # self.activation_hidden_layer_1 = nn.ReLU()
         factor = 2
         next_val = int(initial / factor)
-        for i in range(3):
+        for i in range(1):
             self.hidden_layer = nn.Linear(initial, next_val)
             self.activation_hidden_layer = nn.ReLU()
             next_val = int(initial / factor)
@@ -64,7 +63,6 @@ class Method_MLP(method, nn.Module):
         # CUDA version of code
         # self.fc_layer_2 = nn.Linear(784, 10).cuda()
         # Non CUDA version of code
-        # self.fc_layer_2 = nn.Linear(100, 10)
         self.fc_layer_2 = nn.Linear(next_val, 10)
 
         # CUDA version
@@ -108,8 +106,7 @@ class Method_MLP(method, nn.Module):
     def train(self, X, y):
         # check here for the torch.optim doc: https://pytorch.org/docs/stable/optim.html
         optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
-        # check here for the gradient init doc: https://pytorch.org/docs/stable/generated/torch.optim.Optimizer.zero_grad.html
-        optimizer.zero_grad()
+        
         # check here for the nn.CrossEntropyLoss doc: https://pytorch.org/docs/stable/generated/torch.nn.CrossEntropyLoss.html
         loss_function = nn.CrossEntropyLoss()
         # for training accuracy investigation purpose
