@@ -5,7 +5,7 @@ Concrete SettingModule class for a specific experimental SettingModule
 # Copyright (c) 2017-Current Jiawei Zhang <jiawei@ifmlab.org>
 # License: TBD
 
-from code.stage_3_code.setting import setting
+from code.stage_2_code.setting import setting
 from sklearn.model_selection import KFold
 import numpy as np
 
