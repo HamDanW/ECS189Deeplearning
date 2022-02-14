@@ -130,7 +130,6 @@ class Method_CNN(method, nn.Module):
                       'Precision: ', precision_evaluator.evaluate(), 'Recall: ', recall_evaluator.evaluate(),
                       'F1 (Micro): ', f1_evaluator.evaluate())
 
-
     def test(self, X):
         # do the testing, and result the result
         if self.dataset_name == 'CIFAR' or self.dataset_name == 'ORL':
