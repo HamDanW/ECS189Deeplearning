@@ -28,7 +28,7 @@ torch.manual_seed(2)
 
 # Russell Chien: Put your folder path here for testing data
 data_folder_path = 'data/stage_3_data/'
-data_file_name = 'CIFAR'
+data_file_name = 'MNIST'
 
 data_obj = Dataset_Loader('data', '')
 data_obj.dataset_source_folder_path = Path(data_folder_path)

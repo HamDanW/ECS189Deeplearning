@@ -130,6 +130,7 @@ class Method_CNN(method, nn.Module):
                       'Precision: ', precision_evaluator.evaluate(), 'Recall: ', recall_evaluator.evaluate(),
                       'F1 (Micro): ', f1_evaluator.evaluate())
 
+
     def test(self, X):
         # do the testing, and result the result
         if self.dataset_name == 'CIFAR' or self.dataset_name == 'ORL':
@@ -158,7 +159,7 @@ class Method_CNN(method, nn.Module):
         elif self.dataset_name == 'CIFAR':
             self.batch_size = 1000
 
-            self.fc1 = nn.Linear(2048, 500).to(self.device)
+            self.fc1 = nn.Linear(1024, 500).to(self.device)
             self.fc2 = nn.Linear(500, 300).to(self.device)
             self.fc3 = nn.Linear(300, 100).to(self.device)
             self.fc4 = nn.Linear(100, 10).to(self.device)
@@ -166,7 +167,7 @@ class Method_CNN(method, nn.Module):
             self.batch_size = 360
             self.max_epoch = 500
 
-            self.fc1 = nn.Linear(13824, 1000).to(self.device)
+            self.fc1 = nn.Linear(8960, 1000).to(self.device)
             self.fc2 = nn.Linear(1000, 500).to(self.device)
             self.fc3 = nn.Linear(500, 100).to(self.device)
             self.fc4 = nn.Linear(100, 40).to(self.device)
