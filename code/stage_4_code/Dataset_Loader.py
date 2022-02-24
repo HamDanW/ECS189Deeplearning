@@ -51,8 +51,9 @@ class Dataset_Loader(dataset):
                 train_file.close()
 
                 #Parse file name for label
-                filename = file.name.split('_')
-                train_y.append(filename[1])
+                filename = str(file.name.split('_')[1]).split('.')
+                train_y.append(filename[0])
+
             print("Train Pos Loading Done")
             for file in train_neg_reviews:
                 train_file = open(file, 'rt', encoding="utf-8")
@@ -60,8 +61,8 @@ class Dataset_Loader(dataset):
                 train_file.close()
 
                 #Parse file name for label
-                filename = file.name.split('_')
-                train_y.append(filename[1])
+                filename = str(file.name.split('_')[1]).split('.')
+                train_y.append(filename[0])
 
             print("Train Neg Loading Done")
             for file in test_pos_reviews:
@@ -70,8 +71,8 @@ class Dataset_Loader(dataset):
                 test_file.close()
 
                 #Parse file name for label
-                filename = file.name.split('_')
-                test_y.append(filename[1])
+                filename = str(file.name.split('_')[1]).split('.')
+                test_y.append(filename[0])
 
             print("Test Pos Loading Done")
             for file in test_neg_reviews:
@@ -80,11 +81,21 @@ class Dataset_Loader(dataset):
                 test_file.close()
 
                 #Parse file name for label
-                filename = file.name.split('_')
-                test_y.append(filename[1])
+                filename = str(file.name.split('_')[1]).split('.')
+                test_y.append(filename[0])
 
             print("Test Neg Loading Done")
             print('loaded data')
+
+            # Save labels in text file
+            train_y_file = open('script/stage_4_script/trainY_labels.txt', 'r+', encoding='utf-8')
+            for label in train_y:
+                train_y_file.write(label + '\n')
+
+            test_y_file = open('script/stage_4_script/testY_labels.txt', 'r+', encoding='utf-8')
+            for label in test_y:
+                test_y_file.write(label + '\n')    
+
             
 
             print('cleaning data...')
@@ -150,8 +161,60 @@ class Dataset_Loader(dataset):
             print('All Test reviews List Len: ' + str(len(test_all_reviews)))
             print('All words List Len: ' + str(len(all_words)))
 
-            print('All words List : ' + str(all_words))
+            #print('All words List : ' + str(all_words))
 
+            #Save data in files to increase faster loading
+
+            #Saving Cleaned Train Pos Data
+            word_string = ''
+            for review in train_pos_reviews:
+                word_string = word_string + review + '\n'
+            vocab_file = open('script/stage_4_script/train_pos.txt', 'r+', encoding="utf-8")
+            vocab_file.write(word_string)
+
+            #Saving Cleaned Train Neg Data
+            word_string = ''
+            for review in train_neg_reviews:
+                word_string = word_string + review + '\n'
+            vocab_file = open('script/stage_4_script/train_neg.txt', 'r+', encoding="utf-8")
+            vocab_file.write(word_string)
+
+            #Saving Cleaned Test Pos Data
+            word_string = ''
+            for review in test_pos_reviews:
+                word_string = word_string + review + '\n'
+            vocab_file = open('script/stage_4_script/test_pos.txt', 'r+', encoding="utf-8")
+            vocab_file.write(word_string)
+
+            #Saving Cleaned Test Neg Data
+            word_string = ''
+            for review in test_neg_reviews:
+                word_string = word_string + review + '\n'
+            vocab_file = open('script/stage_4_script/test_neg.txt', 'r+', encoding="utf-8")
+            vocab_file.write(word_string)
+
+            #Saving Cleaned All Train Data
+            word_string = ''
+            for review in train_all_reviews:
+                word_string = word_string + review + '\n'
+            vocab_file = open('script/stage_4_script/train_all.txt', 'r+', encoding="utf-8")
+            vocab_file.write(word_string)
+
+            #Saving Cleaned All Test Data
+            word_string = ''
+            for review in test_all_reviews:
+                word_string = word_string + review + '\n'
+            vocab_file = open('script/stage_4_script/test_all.txt', 'r+', encoding="utf-8")
+            vocab_file.write(word_string)
+
+            #Saving vocab
+            word_string = ''
+            for word in all_words:
+                word_string = word_string + word + '\n'
+            vocab_file = open('script/stage_4_script/vocab.txt', 'r+', encoding="utf-8")
+            vocab_file.write(word_string)
+
+            return 1,1,1,1
 
 
             #Encode Train Sentences
@@ -173,7 +236,7 @@ class Dataset_Loader(dataset):
                             encoded_sent.append(i)
                             break
                 all_encoded_train_sents.append(encoded_sent)
-            
+            '''
             for review in test_all_reviews:
                 #Store encoded form of sentence
                 encoded_sent = []
@@ -190,7 +253,7 @@ class Dataset_Loader(dataset):
                             encoded_sent.append(i)
                             break
                 all_encoded_test_sents.append(encoded_sent)
-
+            '''
             print('Train Y Len: ' + str(len(train_y)))
             print('Test Y Len: ' + str(len(test_y)))
 
