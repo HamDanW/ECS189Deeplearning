@@ -4,13 +4,17 @@ from string import punctuation
 
 from pathlib import Path
 
+import nltk
+from nltk.stem import PorterStemmer
+from nltk.corpus import stopwords
+
 
 class Dataset_Loader(dataset):
     data = None
     dataset_source_folder_path = None
     dataset_source_file_name = None
 
-    load_from_files = True
+    load_from_files = False
 
     def __init__(self, dName=None, dDescription=None):
         super().__init__(dName, dDescription)
@@ -66,6 +70,7 @@ class Dataset_Loader(dataset):
                     word = line.split('\n')[0]
                     all_words.append(word)
                 print('vocab.txt finished loading')
+                
 
 
             else:
@@ -142,9 +147,6 @@ class Dataset_Loader(dataset):
                     test_y.append(filename[0])
                     test_file.close()
 
-                print(train_y)
-                print(test_y)
-
                 print("Test Neg Loading Done")
                 print('loaded data')
 
@@ -163,8 +165,9 @@ class Dataset_Loader(dataset):
                 print('cleaning data...')
 
                 # clean the text
+                stop_words = set(stopwords.words('english'))
                 
-
+                ps = PorterStemmer()
                 for i in range(0,len(train_pos_vec)):
                     train_pos_vec[i] = train_pos_vec[i].lower()
                     train_pos_vec[i] = "".join([c for c in train_pos_vec[i] if c not in punctuation])
@@ -175,8 +178,10 @@ class Dataset_Loader(dataset):
                 
                     #Create vocab dictionary
                     for word in train_pos_vec[i]:
-                        if word not in all_words:
-                            all_words.append(word)
+                        if word not in stop_words:
+                            if ps.stem(word) not in all_words:
+                                all_words.append(ps.stem(word))
+
                 print('train pos list done cleaning')
 
                 for i in range(0,len(train_neg_vec)):
@@ -188,9 +193,10 @@ class Dataset_Loader(dataset):
                     train_neg_vec[i] = train_neg_vec[i].split(' ')
 
                     #Create vocab dictionary
-                    for word in train_neg_vec[i]:
-                        if word not in all_words:
-                            all_words.append(word)
+                    for word in train_pos_vec[i]:
+                        if word not in stop_words:
+                            if ps.stem(word) not in all_words:
+                                all_words.append(ps.stem(word))
 
                 print('train neg list done cleaning')
                 
@@ -203,9 +209,10 @@ class Dataset_Loader(dataset):
                     test_pos_vec[i] = test_pos_vec[i].split(' ')
                 
                     #Create vocab dictionary
-                    for word in test_pos_vec[i]:
-                        if word not in all_words:
-                            all_words.append(word)
+                    for word in train_pos_vec[i]:
+                        if word not in stop_words:
+                            if ps.stem(word) not in all_words:
+                                all_words.append(ps.stem(word))
                 print('test pos list done cleaning')
 
                 for i in range(0,len(test_neg_vec)):
@@ -217,9 +224,10 @@ class Dataset_Loader(dataset):
                     test_neg_vec[i] = test_neg_vec[i].split(' ')
                 
                     #Create vocab dictionary
-                    for word in test_neg_vec[i]:
-                        if word not in all_words:
-                            all_words.append(word)
+                    for word in train_pos_vec[i]:
+                        if word not in stop_words:
+                            if ps.stem(word) not in all_words:
+                                all_words.append(ps.stem(word))
                 print('test neg list done cleaning')
 
                 print('cleaned data')
@@ -241,6 +249,7 @@ class Dataset_Loader(dataset):
                 train_pos_file = open('script/stage_4_script/train_pos.txt', 'r+', encoding="utf-8")
                 train_pos_file.write(word_string)
                 train_pos_file.close()
+                print('train pos finished saving')
 
                 #Saving Cleaned Train Neg Data
                 word_string = ''
@@ -250,6 +259,7 @@ class Dataset_Loader(dataset):
                 train_neg_file = open('script/stage_4_script/train_neg.txt', 'r+', encoding="utf-8")
                 train_neg_file.write(word_string)
                 train_neg_file.close()
+                print('train neg finished saving')
 
                 #Saving Cleaned Test Pos Data
                 word_string = ''
@@ -259,6 +269,7 @@ class Dataset_Loader(dataset):
                 test_pos_file = open('script/stage_4_script/test_pos.txt', 'r+', encoding="utf-8")
                 test_pos_file.write(word_string)
                 test_pos_file.close()
+                print('test pos finished saving')
 
                 #Saving Cleaned Test Neg Data
                 word_string = ''
@@ -268,6 +279,7 @@ class Dataset_Loader(dataset):
                 test_neg_file = open('script/stage_4_script/test_neg.txt', 'r+', encoding="utf-8")
                 test_neg_file.write(word_string)
                 test_neg_file.close()
+                print('test neg finished saving')
 
                 #Saving Cleaned All Train Data
                 word_string = ''
@@ -276,6 +288,7 @@ class Dataset_Loader(dataset):
                 all_train_file = open('script/stage_4_script/train_all.txt', 'r+', encoding="utf-8")
                 all_train_file.write(word_string)
                 all_train_file.close()
+                print('train all reviews finished saving')
 
                 #Saving Cleaned All Test Data
                 word_string = ''
@@ -284,6 +297,7 @@ class Dataset_Loader(dataset):
                 all_test_file = open('script/stage_4_script/test_all.txt', 'r+', encoding="utf-8")
                 all_test_file.write(word_string)
                 all_test_file.close()
+                print('test all reviews finished saving')
 
                 #Saving vocab
                 word_string = ''
@@ -292,6 +306,10 @@ class Dataset_Loader(dataset):
                 vocab_file = open('script/stage_4_script/vocab.txt', 'r+', encoding="utf-8")
                 vocab_file.write(word_string)
                 vocab_file.close()
+                print('vocab finished saving')
+                print(len(all_words))
+
+            return 1,1,1,1
 
             #Encode Train Sentences
             all_encoded_train_sents = []
