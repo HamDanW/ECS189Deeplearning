@@ -48,7 +48,7 @@ class Method_RNN(method, nn.Module):
             optimizer.zero_grad()
             
             #Convert input to tensor
-            tensorX = torch.FloatTensor(np.array(X)).to(self.device)
+            tensorX = torch.FloatTensor(np.array(X, dtype='int64')).to(self.device)
             tensorY = torch.FloatTensor(np.array(y)).to(self.device)
             y_pred = self.forward(tensorX).to(self.device)
             y_true = tensorY
@@ -88,6 +88,10 @@ class Method_RNN(method, nn.Module):
         print('method running...')
         #Assume input is a list of encoded sentences
         #Initalize Embedding Layer
-        self.embedding = nn.Embedding(num_embeddings=len(self.data['train']['train_all_words']), embedding_dim=7, padding_idx=0).to(self.device)
+        self.embedding = nn.Embedding(num_embeddings=len(self.data['all_words']), embedding_dim=7, padding_idx=0).to(self.device)
         self.LSTM = nn.LSTM(input_size=7, hidden_size=3, num_layers=3, batch_first=True).to(self.device)
+        trainX = self.data['train']['X']
+        #print('Type: ' + str(np.array(trainX).dtype))
+        trainY = self.data['train']['y']
+        self.train(trainX, trainY)
 

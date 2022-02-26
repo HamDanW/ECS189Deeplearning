@@ -7,6 +7,8 @@ from pathlib import Path
 import nltk
 from nltk.stem import PorterStemmer
 from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
+
 
 
 class Dataset_Loader(dataset):
@@ -27,6 +29,9 @@ class Dataset_Loader(dataset):
             test_all_reviews = []
             train_y = []
             test_y = []
+            all_encoded_train_sents = []
+            all_encoded_test_sents = []
+
 
             if self.load_from_files:
                 #Load train_all.txt into train_all_reviews[]
@@ -70,7 +75,28 @@ class Dataset_Loader(dataset):
                     word = line.split('\n')[0]
                     all_words.append(word)
                 print('vocab.txt finished loading')
-                
+
+                #Load train encoded
+                train_encoded_file_loc = Path('script/stage_4_script/train_encoded.txt')
+                train_encoded_file = open(train_encoded_file_loc, 'rt', encoding='utf-8')
+                for line in train_encoded_file:
+                    encoded = line.split('\n')[0].split(' ')
+                    temp = []
+                    for num in encoded:
+                        temp.append(int(num))
+                    all_encoded_train_sents.append(temp)
+                print('train_encoded.txt finished loading')
+
+                #Load test encoded
+                test_encoded_file_loc = Path('script/stage_4_script/test_encoded.txt')
+                test_encoded_file = open(test_encoded_file_loc, 'rt', encoding='utf-8')
+                for line in test_encoded_file:
+                    encoded = line.split('\n')[0].split(' ')
+                    temp = []
+                    for num in encoded:
+                        temp.append(int(num))
+                    all_encoded_test_sents.append(temp)
+                print('test_encoded.txt finished loading')
 
 
             else:
@@ -169,65 +195,146 @@ class Dataset_Loader(dataset):
                 
                 ps = PorterStemmer()
                 for i in range(0,len(train_pos_vec)):
+                    #For each element, first change to lowercase
+                    train_pos_vec[i] = train_pos_vec[i].lower()
+
+                    #Next tokenize and remove puncuation and newlines
+                    train_pos_vec[i] = word_tokenize(train_pos_vec[i])
+                    train_pos_vec[i] = [word for word in train_pos_vec[i] if word.isalpha()]
+
+                    #Remove stop words
+                    stop_words = stopwords.words('english')
+                    train_pos_vec[i] = [word for word in train_pos_vec[i] if not word in stop_words]
+                    #review = ' '.join(train_pos_vec[i])
+
+                    #Stem words
+                    train_pos_vec[i] = [ps.stem(word) for word in train_pos_vec[i]]
+
+                    review = ' '.join(train_pos_vec[i])
+                    train_all_reviews.append(review)
+
+
+                    #####    
+                    '''
                     train_pos_vec[i] = train_pos_vec[i].lower()
                     train_pos_vec[i] = "".join([c for c in train_pos_vec[i] if c not in punctuation])
                     review = train_pos_vec[i].split("\n")[0]
                     review = ' '.join(review)
                     train_all_reviews.append(review)
                     train_pos_vec[i] = train_pos_vec[i].split(' ')
-                
+                    '''
+
                     #Create vocab dictionary
                     for word in train_pos_vec[i]:
-                        if word not in stop_words:
-                            if ps.stem(word) not in all_words:
-                                all_words.append(ps.stem(word))
+                        if word not in all_words:
+                                all_words.append(word)
+                            
 
                 print('train pos list done cleaning')
 
                 for i in range(0,len(train_neg_vec)):
+                    #For each element, first change to lowercase
+                    train_neg_vec[i] = train_neg_vec[i].lower()
+
+                    #Next tokenize and remove puncuation and newlines
+                    train_neg_vec[i] = word_tokenize(train_neg_vec[i])
+                    train_neg_vec[i] = [word for word in train_neg_vec[i] if word.isalpha()]
+
+                    #Remove stop words
+                    stop_words = stopwords.words('english')
+                    train_neg_vec[i] = [word for word in train_neg_vec[i] if not word in stop_words]
+                    #review = ' '.join(train_neg_vec[i])
+
+                    #Stem words
+                    train_neg_vec[i] = [ps.stem(word) for word in train_neg_vec[i]]
+
+                    review = ' '.join(train_neg_vec[i])
+                    train_all_reviews.append(review)
+
+                    '''
                     train_neg_vec[i] = train_neg_vec[i].lower()
                     train_neg_vec[i] = "".join([c for c in train_neg_vec[i] if c not in punctuation])
                     review = train_neg_vec[i].split("\n")[0]
                     review = ' '.join(review)
                     train_all_reviews.append(review)
                     train_neg_vec[i] = train_neg_vec[i].split(' ')
+                    '''
 
                     #Create vocab dictionary
-                    for word in train_pos_vec[i]:
-                        if word not in stop_words:
-                            if ps.stem(word) not in all_words:
-                                all_words.append(ps.stem(word))
+                    for word in train_neg_vec[i]:
+                        if word not in all_words:
+                                all_words.append(word)
+                            
 
                 print('train neg list done cleaning')
                 
                 for i in range(0,len(test_pos_vec)):
+                    #For each element, first change to lowercase
+                    test_pos_vec[i] = test_pos_vec[i].lower()
+
+                    #Next tokenize and remove puncuation and newlines
+                    test_pos_vec[i] = word_tokenize(test_pos_vec[i])
+                    test_pos_vec[i] = [word for word in test_pos_vec[i] if word.isalpha()]
+
+                    #Remove stop words
+                    stop_words = stopwords.words('english')
+                    test_pos_vec[i] = [word for word in test_pos_vec[i] if not word in stop_words]
+                    #review = ' '.join(test_pos_vec[i])
+
+                    #Stem words
+                    test_pos_vec[i] = [ps.stem(word) for word in test_pos_vec[i]]
+
+                    review = ' '.join(test_pos_vec[i])
+                    test_all_reviews.append(review)                  
+                    '''
                     test_pos_vec[i] = test_pos_vec[i].lower()
                     test_pos_vec[i] = "".join([c for c in test_pos_vec[i] if c not in punctuation])
                     review = test_pos_vec[i].split("\n")[0]
                     review = ' '.join(review)
                     test_all_reviews.append(review)
                     test_pos_vec[i] = test_pos_vec[i].split(' ')
+                    '''
                 
                     #Create vocab dictionary
-                    for word in train_pos_vec[i]:
-                        if word not in stop_words:
-                            if ps.stem(word) not in all_words:
-                                all_words.append(ps.stem(word))
+                    for word in test_pos_vec[i]:
+                        if word not in all_words:
+                                all_words.append(word)
+                            
                 print('test pos list done cleaning')
 
                 for i in range(0,len(test_neg_vec)):
+                    #For each element, first change to lowercase
+                    test_neg_vec[i] = test_neg_vec[i].lower()
+
+                    #Next tokenize and remove puncuation and newlines
+                    test_neg_vec[i] = word_tokenize(test_neg_vec[i])
+                    test_neg_vec[i] = [word for word in test_neg_vec[i] if word.isalpha()]
+
+                    #Remove stop words
+                    stop_words = stopwords.words('english')
+                    test_neg_vec[i] = [word for word in test_neg_vec[i] if not word in stop_words]
+                    #review = ' '.join(test_neg_vec[i])
+
+                    #Stem words
+                    test_neg_vec[i] = [ps.stem(word) for word in train_neg_vec[i]]
+
+
+                    review = ' '.join(test_neg_vec[i])
+                    test_all_reviews.append(review)                     
+                    '''
                     test_neg_vec[i] = test_neg_vec[i].lower()
                     test_neg_vec[i] = "".join([c for c in test_neg_vec[i] if c not in punctuation])
                     review = test_neg_vec[i].split("\n")[0]
                     review = ' '.join(review)
                     test_all_reviews.append(review)
                     test_neg_vec[i] = test_neg_vec[i].split(' ')
+                    '''
                 
                     #Create vocab dictionary
-                    for word in train_pos_vec[i]:
-                        if word not in stop_words:
-                            if ps.stem(word) not in all_words:
-                                all_words.append(ps.stem(word))
+                    for word in test_neg_vec[i]:
+                        if word not in all_words:
+                                all_words.append(word)
+                            
                 print('test neg list done cleaning')
 
                 print('cleaned data')
@@ -309,52 +416,91 @@ class Dataset_Loader(dataset):
                 print('vocab finished saving')
                 print(len(all_words))
 
-            return 1,1,1,1
+            #return 1,1,1,1
 
-            #Encode Train Sentences
-            all_encoded_train_sents = []
-            all_encoded_test_sents = []
+            
+                print('Begin Train Encoding Reviews')
 
-            for review in train_all_reviews:
-                #Convert review from string format to list format
-                words_in_sent = review.split(' ')
-                #Assuming train_all_words is vocab dictionary and all words appear once in train_all_words
-                #Use index of train_all_words as the numerical mapping for words
-                #If word in words_in_sent = train_all_words[i], append i to encoded_sent
-                for word in words_in_sent:
-                    #Store encoded form of sentence
+                #Encode Train Sentences
+
+                for review in train_all_reviews:
+                    #Convert review from string format to list format
+                    #truncate down to first 200 words
+                    
+
+                    words_in_sent = review.split(' ')
+                    if len(words_in_sent) > 200:
+                        string_match = ' '.join(words_in_sent)
+                        train_all_reviews[train_all_reviews.index(string_match)] = words_in_sent[0:200]
+                        #review = test_neg_vec[i][0:200]
+                    elif len(words_in_sent) < 200:
+                        while len(words_in_sent) < 200:
+                            string_match = ' '.join(words_in_sent)
+                            train_all_reviews[train_all_reviews.index(string_match)] += ' -1'
+                    #Assuming train_all_words is vocab dictionary and all words appear once in train_all_words
+                    #Use index of train_all_words as the numerical mapping for words
+                    #If word in words_in_sent = train_all_words[i], append i to encoded_sent
                     encoded_sent = []
-                    for i in range(0, len(all_words)):
-                        if word is all_words[i]:
-                            encoded_sent.append(i)
-                    all_encoded_train_sents.append(encoded_sent)
-            print(all_encoded_test_sents)
-            '''
-             for review in test_all_reviews:
-                #Store encoded form of sentence
-                encoded_sent = []
-                #Convert review from string format to list format
-                words_in_sent = review.split(' ')
-                print('words in sent: ' + str(words_in_sent))
-                break
-                #Assuming train_all_words is vocab dictionary and all words appear once in train_all_words
-                #Use index of train_all_words as the numerical mapping for words
-                #If word in words_in_sent = train_all_words[i], append i to encoded_sent
-                for word in words_in_sent:
-                    for i in range(0, len(all_words)):
-                        if word is all_words[i]:
-                            encoded_sent.append(i)
-                            break
-                all_encoded_test_sents.append(encoded_sent)
-            '''
-            print('Train Y Len: ' + str(len(train_y)))
-            print('Test Y Len: ' + str(len(test_y)))
+                    for word in words_in_sent:
+                        #Store encoded form of sentence
+                        if word in all_words or word == '-1':
+                            encoded_sent.append(str(all_words.index(word)))
 
-            print('test: ' + str(all_encoded_train_sents[0]))
+                    all_encoded_train_sents.append(encoded_sent)
+                #print(all_encoded_test_sents)
+                print('Train encoded done')
+
+                print('Begin Test Encoding Reviews')
+                for review in test_all_reviews:
+                    #Convert review from string format to list format
+                    words_in_sent = review.split(' ')
+
+                    if len(words_in_sent) > 200:
+                        string_match = ' '.join(words_in_sent)
+                        test_all_reviews[test_all_reviews.index(string_match)] = words_in_sent[0:200]
+                        #review = test_neg_vec[i][0:200]
+                    elif len(words_in_sent) < 200:
+                        while len(words_in_sent) < 200:
+                            string_match = ' '.join(words_in_sent)
+                            test_all_reviews[test_all_reviews.index(string_match)] += ' -1'
+                    #Assuming train_all_words is vocab dictionary and all words appear once in train_all_words
+                    #Use index of train_all_words as the numerical mapping for words
+                    #If word in words_in_sent = train_all_words[i], append i to encoded_sent
+                    encoded_sent = []
+                    for word in words_in_sent:
+                        #Store encoded form of sentence
+                        if word in all_words or word == '-1':
+                            encoded_sent.append(str(all_words.index(word)))
+                            
+                    all_encoded_test_sents.append(encoded_sent)
+                    
+
+                print('Test encoding done')
+
+                print('Begin saving train encoding')
+                #Save train encoded into train_encoded.txt
+                word_string = ''
+                for review in all_encoded_train_sents:
+                    joined = ' '.join(review)
+                    word_string = word_string + joined + '\n'
+                train_encoded_file = open('script/stage_4_script/train_encoded.txt', 'r+', encoding="utf-8")
+                train_encoded_file.write(word_string)
+                train_encoded_file.close()
+                print('train encoded finished saving')
+
+                print('Begin saving test encoding')
+                #Save test encoded into test_encoded.txt
+                word_string = ''
+                for review in all_encoded_test_sents:
+                    joined = ' '.join(review)
+                    word_string = word_string + joined + '\n'
+                test_encoded_file = open('script/stage_4_script/test_encoded.txt', 'r+', encoding="utf-8")
+                test_encoded_file.write(word_string)
+                test_encoded_file.close()
 
             #Return Encoded versions of train and test reviews
 
             #return train_all_reviews, train_all_words, test_all_reviews, test_all_words
-            return all_encoded_train_sents, train_y, all_encoded_test_sents, test_y
+            return all_encoded_train_sents, train_y, all_encoded_test_sents, test_y, all_words
 
         
