@@ -14,28 +14,41 @@ class Method_RNN(method, nn.Module):
     data = None
 
     max_epoch = 100
-    learning_rate = .1
-    
+    learning_rate = .001
 
     # CUDA
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    def __init__(self, mName, mDescription):
+
+    def __init__(self, mName, mDescription, vocab_size, embedding_dim, hidden_dim, output_dim, n_layers, bidirectional=False, dropout=0):
         method.__init__(self, mName, mDescription)
         nn.Module.__init__(self)
-        self.embedding = ''
-        self.LSTM = ''
-        self.fc1 = nn.Linear(3, 10).to(self.device)
-        self.drop = nn.Dropout(p=0.2).to(self.device)
+        self.embedding = nn.Embedding(vocab_size, embedding_dim).to(self.device)
+
+        self.rnn = nn.LSTM(embedding_dim, hidden_dim, num_layers=n_layers, bidirectional=bidirectional, dropout=dropout).to(self.device)
+
+        self.fc = nn.Linear(hidden_dim * 2, output_dim).to(self.device)
+
+        self.dropout = nn.Dropout(dropout).to(self.device)
+
         self.soft = nn.Softmax(dim=1)
 
-
     def forward(self, x):
+        '''
         embed = self.embedding(x).to(self.device)
-        dropped = self.drop(embed).to(self.device)
-        out, (h_state, c_state) = self.LSTM(dropped).to(self.device)
-        fc = self.fc1(h_state[-1]).to(self.device)
+        dropped = self.dropout(embed).to(self.device)
+        out, (h_state, c_state) = self.rnn(dropped).to(self.device)
+        fc = self.fc(h_state[-1]).to(self.device)
         soft = self.soft(fc)
         return soft
+        '''
+
+        # text generation
+        embed = self.embedding(x).to(self.device)
+        output, (h_state, c_state) = self.rnn(embed).to(self.device)
+        fc = self.fc(h_state[-1]).to(self.device)
+
+
+        return fc
 
     def train(self, X, y):
         #Optimizer
@@ -48,8 +61,10 @@ class Method_RNN(method, nn.Module):
             optimizer.zero_grad()
             
             #Convert input to tensor
-            tensorX = torch.FloatTensor(np.array(X, dtype='int64')).to(self.device)
-            tensorY = torch.FloatTensor(np.array(y)).to(self.device)
+            tensorX = torch.tensor(np.array(X)).to(self.device).long()
+            tensorY = torch.tensor(np.array(y)).to(self.device).long()
+            # tensorX = torch.FloatTensor(np.array(X, dtype='int64')).to(self.device)
+            # tensorY = torch.FloatTensor(np.array(y)).to(self.device)
             y_pred = self.forward(tensorX).to(self.device)
             y_true = tensorY
 
