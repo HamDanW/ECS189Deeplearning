@@ -18,6 +18,7 @@ class Method_RNN(method, nn.Module):
 
     # CUDA
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    # device = 'cpu'
 
     def __init__(self, mName, mDescription, vocab_size, embedding_dim, hidden_dim, output_dim, n_layers, bidirectional=False, dropout=0):
         method.__init__(self, mName, mDescription)
@@ -43,12 +44,13 @@ class Method_RNN(method, nn.Module):
         '''
 
         # text generation
+        # hidden layers needed to be fixed i think
         embed = self.embedding(x).to(self.device)
-        output, (h_state, c_state) = self.rnn(embed).to(self.device)
+        output, (h_state, c_state) = self.rnn(embed, embed).to(self.device)
         fc = self.fc(h_state[-1]).to(self.device)
+        soft = self.soft(fc)
 
-
-        return fc
+        return soft
 
     def train(self, X, y):
         #Optimizer

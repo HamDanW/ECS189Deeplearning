@@ -537,19 +537,17 @@ class Dataset_Loader(dataset):
             vocab_clean = sum(vocab_clean, [])
 
             print('all jokes list length:', len(jokes_vec_clean))
-            print(jokes_vec_clean[100])
             print('vocab list length:', len(vocab_clean))
 
-
-            # FIX: encoding needs to be fixed
+            # encoding
             sequences = []
 
             for joke in jokes_vec_clean:
-                curr_joke = ' '.join(joke)
-                if len(curr_joke.split()) > 5:
-                    for i in range(5, len(curr_joke.split())):
-                        seq = curr_joke.split()[i-5:i+1]
-                        sequences.append(" ".join(seq))
+                curr_joke = ''.join(joke)
+                if len(curr_joke.split(' ')) > 5:
+                    for i in range(5, len(curr_joke.split(' '))):
+                        seq = curr_joke.split(' ')[i-5:i+1]
+                        sequences.append(' '.join(seq))
 
             print('sequence list size:', len(sequences))
 
