@@ -1,11 +1,10 @@
 import string
 from code.base_class.dataset import dataset
+import numpy as np
 
 from string import punctuation
 
 from pathlib import Path
-
-import numpy as np
 
 import nltk
 from nltk.stem import PorterStemmer
@@ -13,10 +12,13 @@ from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 
 
+
 class Dataset_Loader(dataset):
     data = None
     dataset_source_folder_path = None
     dataset_source_file_name = None
+
+    max_len = 200
 
     load_from_files = True
     def __init__(self, dName=None, dDescription=None):
@@ -103,13 +105,6 @@ class Dataset_Loader(dataset):
                     all_encoded_test_sents.append(temp)
                 print('test_encoded.txt finished loading')
                 
-                
-                         
-                
-
-                
-
-
             else:
                 # set up the file paths
 
@@ -151,9 +146,9 @@ class Dataset_Loader(dataset):
                     # Let <= 4 be negative (0) and >= 7 be positive (1)
                     filename = str(train_file.name.split('_')[-1]).split('.')
                     if int(filename[0]) <= 4:
-                        train_y.append('0')
+                        train_y.append(0)
                     elif int(filename[0]) >= 7:
-                        train_y.append('1')
+                        train_y.append(1)
                     #train_y.append(filename[0])
                     train_file.close()
                 print("Train Pos Loading Done")
@@ -167,9 +162,9 @@ class Dataset_Loader(dataset):
                     #Parse file name for label
                     filename = str(train_file.name.split('_')[-1]).split('.')
                     if int(filename[0]) <= 4:
-                        train_y.append('0')
+                        train_y.append(0)
                     elif int(filename[0]) >= 7:
-                        train_y.append('1')
+                        train_y.append(1)
                     #train_y.append(filename[0])
                     train_file.close()
                 print("Train Neg Loading Done")
@@ -181,9 +176,9 @@ class Dataset_Loader(dataset):
                     #Parse file name for label
                     filename = str(test_file.name.split('_')[-1]).split('.')
                     if int(filename[0]) <= 4:
-                        test_y.append('0')
+                        test_y.append(0)
                     elif int(filename[0]) >= 7:
-                        test_y.append('1')
+                        test_y.append(1)
 
                     #test_y.append(filename[0])
                     test_file.close()
@@ -196,9 +191,9 @@ class Dataset_Loader(dataset):
                     #Parse file name for label
                     filename = str(file.name.split('_')[-1]).split('.')
                     if int(filename[0]) <= 4:
-                        test_y.append('0')
+                        test_y.append(0)
                     elif int(filename[0]) >= 7:
-                        test_y.append('1')
+                        test_y.append(1)
                     #test_y.append(filename[0])
                     test_file.close()
 
@@ -208,12 +203,12 @@ class Dataset_Loader(dataset):
                 # Save labels in text file
                 train_y_file = open('script/stage_4_script/trainY_labels.txt', 'r+', encoding='utf-8')
                 for label in train_y:
-                    train_y_file.write(label + '\n')
+                    train_y_file.write(str(label) + '\n')
                 train_y_file.close()
 
                 test_y_file = open('script/stage_4_script/testY_labels.txt', 'r+', encoding='utf-8')
                 for label in test_y:
-                    test_y_file.write(label + '\n')    
+                    test_y_file.write(str(label) + '\n')    
                 test_y_file.close()
                 
 
@@ -244,10 +239,10 @@ class Dataset_Loader(dataset):
                     #Truncate down to 80 words or pad to 80
                     words_in_sent = [] + train_pos_vec[i]
 
-                    if len(words_in_sent) >= 20:
-                        words_in_sent = words_in_sent[0:20]
-                    elif len(words_in_sent) < 20:
-                        while len(words_in_sent) < 20:
+                    if len(words_in_sent) >= self.max_len:
+                        words_in_sent = words_in_sent[0:self.max_len]
+                    elif len(words_in_sent) < self.max_len:
+                        while len(words_in_sent) < self.max_len:
                             words_in_sent.append('-1')
 
 
@@ -267,7 +262,7 @@ class Dataset_Loader(dataset):
                     for word in words_in_sent:
                         if word not in all_words:
                                 all_words.append(word)
-
+                            
 
                 print('train pos list done cleaning')
 
@@ -303,10 +298,10 @@ class Dataset_Loader(dataset):
 
                     #Truncate down to 80 words or pad to 80
                     words_in_sent = [] + train_neg_vec[i]
-                    if len(words_in_sent) >= 20:
-                        words_in_sent = words_in_sent[0:20]
-                    elif len(words_in_sent) < 20:
-                        while len(words_in_sent) < 20:
+                    if len(words_in_sent) >= self.max_len:
+                        words_in_sent = words_in_sent[0:self.max_len]
+                    elif len(words_in_sent) < self.max_len:
+                        while len(words_in_sent) < self.max_len:
                             words_in_sent.append('-1')
 
                     review = ' '.join(words_in_sent)
@@ -325,7 +320,7 @@ class Dataset_Loader(dataset):
                     for word in words_in_sent:
                         if word not in all_words:
                                 all_words.append(word)
-
+                            
 
                 print('train neg list done cleaning')
 
@@ -358,10 +353,10 @@ class Dataset_Loader(dataset):
 
                     #Truncate down to 80 words or pad to 80
                     words_in_sent = [] + test_pos_vec[i]
-                    if len(words_in_sent) >= 20:
-                        words_in_sent = words_in_sent[0:20]
-                    elif len(words_in_sent) < 20:
-                        while len(words_in_sent) < 20:
+                    if len(words_in_sent) >= self.max_len:
+                        words_in_sent = words_in_sent[0:self.max_len]
+                    elif len(words_in_sent) < self.max_len:
+                        while len(words_in_sent) < self.max_len:
                             words_in_sent.append('-1')
 
                     review = ' '.join(words_in_sent)
@@ -374,12 +369,12 @@ class Dataset_Loader(dataset):
                     test_all_reviews.append(review)
                     test_pos_vec[i] = test_pos_vec[i].split(' ')
                     '''
-
+                
                     #Create vocab dictionary
                     for word in words_in_sent:
                         if word not in all_words:
                                 all_words.append(word)
-
+                            
                 print('test pos list done cleaning')
 
                 #Saving Cleaned Test Pos Data
@@ -411,10 +406,10 @@ class Dataset_Loader(dataset):
 
                     #Truncate down to 100 words or pad to 100
                     words_in_sent = [] + test_neg_vec[i]
-                    if len(words_in_sent) >= 20:
-                        words_in_sent = words_in_sent[0:20]
-                    elif len(words_in_sent) < 20:
-                        while len(words_in_sent) < 20:
+                    if len(words_in_sent) >= self.max_len:
+                        words_in_sent = words_in_sent[0:self.max_len]
+                    elif len(words_in_sent) < self.max_len:
+                        while len(words_in_sent) < self.max_len:
                             words_in_sent.append('-1')
 
 
@@ -428,12 +423,12 @@ class Dataset_Loader(dataset):
                     test_all_reviews.append(review)
                     test_neg_vec[i] = test_neg_vec[i].split(' ')
                     '''
-
+                
                     #Create vocab dictionary
                     for word in words_in_sent:
                         if word not in all_words:
                                 all_words.append(word)
-
+                            
                 print('test neg list done cleaning')
 
                 #Saving Cleaned Test Neg Data
@@ -482,10 +477,6 @@ class Dataset_Loader(dataset):
                 vocab_file.write(word_string)
                 vocab_file.close()
                 print('vocab finished saving')
-                print(len(all_words))
-
-            #return 1,1,1,1
-
             
                 print('Begin Encoding Train')
                 #Encode Train Sentences
@@ -506,13 +497,28 @@ class Dataset_Loader(dataset):
                     for word in words_in_sent:
                         #Store encoded form of sentence
                         if word in all_words:
-                            encoded_sent.append(all_words.index(word))
+                            encoded_sent.append(str(all_words.index(word)))
                         elif word == -1:
-                            encoded_sent.append(-1)
+                            encoded_sent.append('-1')
                     all_encoded_train_sents.append(encoded_sent)
                 print('Finished encoding Train')
 
-                #print(all_encoded_test_sents)
+                print('Begin saving train encoding')
+                #Save train encoded into train_encoded.txt
+                word_string = ''
+                for review in all_encoded_train_sents:
+                    joined = ' '.join(review)
+                    word_string = word_string + joined + '\n'
+                train_encoded_file = open('script/stage_4_script/train_encoded.txt', 'r+', encoding="utf-8")
+                train_encoded_file.write(word_string)
+                train_encoded_file.close()
+                print('train encoded finished saving')
+
+                print('Converting Encoded Train to list of ints')
+                #Convert encoded reviews to list of ints
+                for review in all_encoded_train_sents:
+                    for i in range(0,len(review)):
+                        review[i] = int(review[i])
 
                 print('Begin Encoding Test')
                 #Encode Test Sentences
@@ -532,22 +538,13 @@ class Dataset_Loader(dataset):
                     for word in words_in_sent:
                         #Store encoded form of sentence
                         if word in all_words:
-                            encoded_sent.append(all_words.index(word))
+                            encoded_sent.append(str(all_words.index(word)))
                         elif word == -1:
-                            encoded_sent.append(-1)
+                            encoded_sent.append('-1')
                     all_encoded_test_sents.append(encoded_sent)
                 print('Finished Encoding Test')
 
-                print('Begin saving train encoding')
-                #Save train encoded into train_encoded.txt
-                word_string = ''
-                for review in all_encoded_train_sents:
-                    joined = ' '.join(review)
-                    word_string = word_string + joined + '\n'
-                train_encoded_file = open('script/stage_4_script/train_encoded.txt', 'r+', encoding="utf-8")
-                train_encoded_file.write(word_string)
-                train_encoded_file.close()
-                print('train encoded finished saving')
+                
 
                 print('Begin saving test encoding')
                 #Save test encoded into test_encoded.txt
@@ -559,12 +556,153 @@ class Dataset_Loader(dataset):
                 test_encoded_file.write(word_string)
                 test_encoded_file.close()
 
+                print('Converting Encoded Test to list of ints')
+                #Convert encoded reviews to list of ints
+                for review in all_encoded_test_sents:
+                    for i in range(0,len(review)):
+                        review[i] = int(review[i])
+
             #Return Encoded versions of train and test reviews
 
             #return train_all_reviews, train_all_words, test_all_reviews, test_all_words
             return all_encoded_train_sents, train_y, all_encoded_test_sents, test_y, all_words
 
         elif self.dataset_source_file_name == 'text_generation/':
+            '''
+            # set file path
+            jokes_file_loc = Path(self.dataset_source_folder_path / self.dataset_source_file_name / 'data')
+
+            jokes_file = open(jokes_file_loc, 'rt', encoding='utf-8')
+
+            #List of strings
+            all_jokes = []
+            clean_jokes = []
+            all_encoded_jokes = []
+            all_words = []
+            input = []
+            encoded_input = []
+            #Get data from file
+            print("Loading Jokes")
+            for line in jokes_file:
+                #Split by , to get rid of id
+                joke = ' '.join(line.split('\n'[0])).split(',')
+                final = []
+                for i in range(1, len(joke)):
+                    final.append(joke[i])
+                final = ' '.join(final)    
+                all_jokes.append(final)
+            jokes_file.close()
+            print('Done loading jokes')
+
+            #Get length of longest joke
+            max_len_gen = 0
+            for joke in all_jokes:
+                if len(joke) > max_len_gen:
+                    max_len_gen = len(joke)
+            print('Max joke length: ' + str(max_len_gen))
+
+            #Clean text
+            print('Cleaning Jokes')
+            for i in range(0,len(all_jokes)):
+                #For each element, first change to lowercase
+                all_jokes[i] = all_jokes[i].lower()
+
+                #Next tokenize and remove puncuation and newlines
+                all_jokes[i] = word_tokenize(all_jokes[i])
+                all_jokes[i] = [word for word in all_jokes[i] if word.isalpha()]
+
+                #Remove stop words
+                #stop_words = stopwords.words('english')
+                #all_jokes[i] = [word for word in all_jokes[i] if not word in stop_words]
+                #review = ' '.join(train_pos_vec[i])
+
+                #Stem words
+                ps = PorterStemmer()
+                all_jokes[i] = [ps.stem(word) for word in all_jokes[i]]
+
+                words_in_sent = [] + all_jokes[i]
+                
+                if len(words_in_sent) < max_len_gen:
+                    while len(words_in_sent) < max_len_gen:
+                        words_in_sent.append('-1')
+                print(words_in_sent)
+            
+
+                joke = ' '.join(words_in_sent)
+                clean_jokes.append(joke)
+
+                #Create vocab dictionary
+                for word in words_in_sent:
+                    if word not in all_words:
+                            all_words.append(word)
+            print("Done Cleaning Jokes")
+
+            print('Creating Training Input')
+            #Create training input
+            for i in range(0, len(clean_jokes)):
+                input.append(clean_jokes[i][0:5])
+            print('Done Creating Training Input')
+
+            #Encode Clean Jokes
+            print('Begin Encoding Clean Jokes')
+            for i in range(0, len(clean_jokes)):
+                words_in_joke = clean_jokes[i].split(' ')
+
+                #Assuming all_words is vocab dictionary and all words appear once in all_words
+                #Use index of all_words as the numerical mapping for words
+                #If word in words_in_sent = all_words[i], append i to encoded_joke
+                encoded_joke = []
+                for word in words_in_joke:
+                    #Store encoded form of sentence
+                    if word in all_words:
+                        encoded_joke.append(str(all_words.index(word)))
+                    elif word == '-1':
+                        encoded_joke.append('-1')
+                all_encoded_jokes.append(encoded_joke)
+            print('Finished Encoding Clean Jokes')
+            print(all_encoded_jokes)
+
+            print('Converting Encoded Jokes to list of ints')
+            #Convert encoded reviews to list of ints
+            for review in all_encoded_jokes:
+                for i in range(0,len(review)):
+                    review[i] = int(review[i])
+            
+
+            #Encode Input Jokes
+            print('Begin Encoding Input Jokes')
+            for i in range(0, len(input)):
+                words_in_joke = input[i].split(' ')
+
+                #Assuming all_words is vocab dictionary and all words appear once in all_words
+                #Use index of all_words as the numerical mapping for words
+                #If word in words_in_sent = all_words[i], append i to encoded_joke
+                encoded_joke = []
+                for word in words_in_joke:
+                    #Store encoded form of sentence
+                    if word in all_words:
+                        encoded_joke.append(str(all_words.index(word)))
+                    elif word == '-1':
+                        encoded_joke.append('-1')
+                encoded_input.append(encoded_joke)
+            print('Finished Encoding Input Jokes')
+
+            print('Converting Encoded Input Jokes to list of ints')
+            #Convert encoded reviews to list of ints
+            for review in encoded_input:
+                for i in range(0,len(review)):
+                    review[i] = int(review[i])
+            #print(encoded_input)
+            
+
+            print('Length of all_encoded_jokes: ' + str(len(all_encoded_jokes)))
+            print('Length of encoded_joke: ' + str(len(encoded_input)))
+            print('Vocab Size: ' + str(len(all_words)))
+
+            #Return encoded jokes and vocab dictionary
+            return all_encoded_jokes, input,all_words 
+            '''
+
             # set file path
             jokes = Path(self.dataset_source_folder_path / self.dataset_source_file_name / 'data')
             jokes_vec = []
@@ -644,3 +782,4 @@ class Dataset_Loader(dataset):
 
             return np.array(x_int), np.array(y_int), sequences, token2int
 
+            

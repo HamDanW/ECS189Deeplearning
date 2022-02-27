@@ -20,18 +20,19 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # change data_file_name for text_classifcation/text_generation
 data_folder_path = 'data/stage_4_data/'
-data_file_name = 'text_classification/'
-
-data_obj = Dataset_Loader('train', '')
-data_obj.dataset_source_folder_path = Path(data_folder_path)
-data_obj.dataset_source_file_name = data_file_name
-
-#train_all_reviews, train_all_words, test_all_reviews, test_all_words = data_obj.load()
+data_file_name = 'text_generation/'
 
 if data_file_name == 'text_classification/':
-    data_obj.load_from_files = True
+    data_obj = Dataset_Loader('train', '')
+    data_obj.dataset_source_folder_path = Path(data_folder_path)
+    data_obj.dataset_source_file_name = data_file_name
 
-    model = Method_RNN('RNN', '')
+    #train_all_reviews, train_all_words, test_all_reviews, test_all_words = data_obj.load()
+    train_data, train_y, test_data, test_y, vocab = data_obj.load()
+
+    input = {'train': {'X': train_data, 'y': train_y}, 'test': {'X': test_data, 'y': test_y}, 'all_words': vocab}
+
+    model = Method_RNN('LSTM', '')
     model.data = input
     model.to(device)
     test_results = model.run()
@@ -67,24 +68,23 @@ if data_file_name == 'text_classification/':
     result_obj.result_destination_folder_path = result_folder_path
     result_obj.result_destination_file_name = result_folder_name
 
+
     print('Done')
-
 elif data_file_name == 'text_generation/':
-    X, y, tokens, encoder = data_obj.load()
-    print('Data loaded')
+    data_obj = Dataset_Loader('train', '')
+    data_obj.dataset_source_folder_path = Path(data_folder_path)
+    data_obj.dataset_source_file_name = data_file_name
 
-    input_size = 15424
-    embed_dim = 128
-    hidden_dim = 256
-    output_dim = 128
-    n_layers = 4
-    bidirectional = False
-    dropout = .2
+    #Load data
+    encoded_x, encoded_y, sequences, vocab = data_obj.load()
+    input = {'X': encoded_x, 'y': encoded_y, 'all_words': vocab, 'sequences': sequences}
 
-    model = Method_RNN('RNN model', '',
-                       vocab_size=input_size, embedding_dim=embed_dim,
-                       hidden_dim=hidden_dim, output_dim=output_dim,
-                       n_layers=n_layers, bidirectional=bidirectional, dropout=dropout)
-    model.train(X, y)
+    #Create Model
+    model = Method_RNN('LSTM', '')
+    model.data = input
+    model.text_class = False
+    model.to(device)
+    test_results = model.run()
 
 
+    print('Done')
