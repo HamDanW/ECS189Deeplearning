@@ -40,7 +40,11 @@ class Method_RNN(method, nn.Module):
         embed = self.embedding(x).to(self.device)
         dropped = self.drop(embed).to(self.device)
         out, (hidden, cell) = self.LSTM(dropped)
-        fc = self.fc1(self.drop(hidden[-1])).to(self.device)
+        if not self.text_class:
+            out = out.reshape(-1, self.num_hidden)
+            fc = self.fc1(self.drop(out)).to(self.device)
+        elif self.text_class:
+            fc = self.fc1(self.drop(hidden[-1])).to(self.device)
         soft = self.soft(fc)
         return soft
 
@@ -70,8 +74,10 @@ class Method_RNN(method, nn.Module):
                 y_true = miniy
 
                 # calculate the training loss
-                train_loss = loss_function(y_pred, y_true).to(self.device)
-
+                if not self.text_class:
+                    train_loss = loss_function(y_pred, y_true.view(-1)).to(self.device)
+                elif self.text_class:
+                    train_loss = loss_function(y_pred, y_true).to(self.device)
                 # check here for the loss.backward doc: https://pytorch.org/docs/stable/generated/torch.Tensor.backward.html
                 # do the error backpropagation to calculate the gradients
                     
@@ -80,20 +86,23 @@ class Method_RNN(method, nn.Module):
                 # update the variables according to the optimizer and the gradients calculated by the above loss.backward function
                 optimizer.step()
 
-            # Create evaluation objects that represent evaluation metrics
-            accuracy_evaluator = Evaluate_Accuracy('accuracy training evaluator', '')
-            precision_evaluator = Evaluate_Precision('precision (micro) training evaluator', '')
-            recall_evaluator = Evaluate_Recall('recall training evaluator', '')
-            f1_evaluator = Evaluate_F1('f1 (micro) training evaluator', '')
+            if self.text_class:
+                # Create evaluation objects that represent evaluation metrics
+                accuracy_evaluator = Evaluate_Accuracy('accuracy training evaluator', '')
+                precision_evaluator = Evaluate_Precision('precision (micro) training evaluator', '')
+                recall_evaluator = Evaluate_Recall('recall training evaluator', '')
+                f1_evaluator = Evaluate_F1('f1 (micro) training evaluator', '')
 
-            if epoch % 10 == 0:
-                accuracy_evaluator.data = {'true_y': y_true.to('cpu'), 'pred_y': y_pred.to('cpu').max(1)[1]}
-                precision_evaluator.data = {'true_y': y_true.to('cpu'), 'pred_y': y_pred.to('cpu').max(1)[1]}
-                recall_evaluator.data = {'true_y': y_true.to('cpu'), 'pred_y': y_pred.to('cpu').max(1)[1]}
-                f1_evaluator.data ={'true_y': y_true.to('cpu'), 'pred_y': y_pred.to('cpu').max(1)[1]}
-                print('Epoch:', epoch, 'Accuracy:', accuracy_evaluator.evaluate(), 'Loss:', train_loss.item(),
-                      'Precision: ', precision_evaluator.evaluate(), 'Recall: ', recall_evaluator.evaluate(),
-                      'F1 (Micro): ', f1_evaluator.evaluate())
+                if epoch % 10 == 0:
+                    print(y_pred.shape)
+                    print(y_true.shape)
+                    accuracy_evaluator.data = {'true_y': y_true.to('cpu'), 'pred_y': y_pred.to('cpu').max(1)[1]}
+                    precision_evaluator.data = {'true_y': y_true.to('cpu'), 'pred_y': y_pred.to('cpu').max(1)[1]}
+                    recall_evaluator.data = {'true_y': y_true.to('cpu'), 'pred_y': y_pred.to('cpu').max(1)[1]}
+                    f1_evaluator.data ={'true_y': y_true.to('cpu'), 'pred_y': y_pred.to('cpu').max(1)[1]}
+                    print('Epoch:', epoch, 'Accuracy:', accuracy_evaluator.evaluate(), 'Loss:', train_loss.item(),
+                        'Precision: ', precision_evaluator.evaluate(), 'Recall: ', recall_evaluator.evaluate(),
+                        'F1 (Micro): ', f1_evaluator.evaluate())
 
     
     def test(self, X, y):
@@ -139,11 +148,13 @@ class Method_RNN(method, nn.Module):
             print('-----------------Testing Done-----------------')
             return results
         elif not self.text_class:
+            print('Text Gen')
             vocab_size = len(self.data['all_words'])
+            self.num_hidden = 300
             self.embedding = nn.Embedding(num_embeddings=vocab_size, embedding_dim=300, padding_idx=0).to(self.device)
             self.LSTM = nn.LSTM(input_size=300, hidden_size=self.num_hidden, num_layers=self.num_layers, batch_first=True).to(self.device)
             self.fc1 = nn.Linear(300, vocab_size).to(self.device)
-            num_hidden = 300
+            
             print('-----------------Start Training-----------------')
             trainX = self.data['X']
             #print('Type: ' + str(np.array(trainX).dtype))
