@@ -22,7 +22,9 @@ class Method_RNN(method, nn.Module):
 
     # CUDA
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    def __init__(self, mName, mDescription):
+    # device = 'cpu'
+
+    def __init__(self, mName, mDescription, vocab_size, embedding_dim, hidden_dim, output_dim, n_layers, bidirectional=False, dropout=0):
         method.__init__(self, mName, mDescription)
         nn.Module.__init__(self)
         self.embedding = ''
@@ -31,13 +33,29 @@ class Method_RNN(method, nn.Module):
         self.drop = nn.Dropout(p=0.2).to(self.device)
         self.soft = nn.Softmax(dim=1)
 
+        self.fc = nn.Linear(hidden_dim * 2, output_dim).to(self.device)
+
+        self.dropout = nn.Dropout(dropout).to(self.device)
+
+        self.soft = nn.Softmax(dim=1)
 
     def forward(self, x):
+        '''
         embed = self.embedding(x).to(self.device)
         dropped = self.drop(embed).to(self.device)
         out, (hidden, cell) = self.LSTM(dropped)
         fc = self.fc1(self.drop(hidden[-1])).to(self.device)
         soft = self.soft(fc)
+        return soft
+        '''
+
+        # text generation
+        # hidden layers needed to be fixed i think
+        embed = self.embedding(x).to(self.device)
+        output, (h_state, c_state) = self.rnn(embed, embed).to(self.device)
+        fc = self.fc(h_state[-1]).to(self.device)
+        soft = self.soft(fc)
+
         return soft
 
     def train(self, X, y):

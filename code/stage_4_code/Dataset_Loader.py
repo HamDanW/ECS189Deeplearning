@@ -5,11 +5,12 @@ from string import punctuation
 
 from pathlib import Path
 
+import numpy as np
+
 import nltk
 from nltk.stem import PorterStemmer
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
-
 
 
 class Dataset_Loader(dataset):
@@ -266,7 +267,7 @@ class Dataset_Loader(dataset):
                     for word in words_in_sent:
                         if word not in all_words:
                                 all_words.append(word)
-                            
+
 
                 print('train pos list done cleaning')
 
@@ -324,7 +325,7 @@ class Dataset_Loader(dataset):
                     for word in words_in_sent:
                         if word not in all_words:
                                 all_words.append(word)
-                            
+
 
                 print('train neg list done cleaning')
 
@@ -373,12 +374,12 @@ class Dataset_Loader(dataset):
                     test_all_reviews.append(review)
                     test_pos_vec[i] = test_pos_vec[i].split(' ')
                     '''
-                
+
                     #Create vocab dictionary
                     for word in words_in_sent:
                         if word not in all_words:
                                 all_words.append(word)
-                            
+
                 print('test pos list done cleaning')
 
                 #Saving Cleaned Test Pos Data
@@ -427,12 +428,12 @@ class Dataset_Loader(dataset):
                     test_all_reviews.append(review)
                     test_neg_vec[i] = test_neg_vec[i].split(' ')
                     '''
-                
+
                     #Create vocab dictionary
                     for word in words_in_sent:
                         if word not in all_words:
                                 all_words.append(word)
-                            
+
                 print('test neg list done cleaning')
 
                 #Saving Cleaned Test Neg Data
@@ -563,4 +564,77 @@ class Dataset_Loader(dataset):
             #return train_all_reviews, train_all_words, test_all_reviews, test_all_words
             return all_encoded_train_sents, train_y, all_encoded_test_sents, test_y, all_words
 
-        
+        elif self.dataset_source_file_name == 'text_generation/':
+            # set file path
+            jokes = Path(self.dataset_source_folder_path / self.dataset_source_file_name / 'data')
+            jokes_vec = []
+
+            jokes_file = open(jokes, 'r+', encoding='utf-8')
+            # add jokes to vector, get rid of id in beginning
+            for line in jokes_file:
+                jokes_vec.append(line[line.find(',')+1:].lower())
+
+            # remove first line because it doesn't contain a joke
+            jokes_vec.pop(0)
+
+            jokes_vec_clean = []
+            for line in jokes_vec:
+                curr = ''
+                curr_tokens = word_tokenize(line)
+                curr += ' '.join([word for word in curr_tokens if word.isalnum()])
+                # jokes_vec_clean.append([word for word in curr_tokens if word.isalnum()])
+                jokes_vec_clean.append(curr)
+
+            # jokes_vec_clean = sum(jokes_vec_clean, [])
+
+            # create vocab list
+            vocab = sorted(set(jokes_vec))
+            vocab_clean = []
+            for line in vocab:
+                curr_tokens = word_tokenize(line)
+                vocab_clean.append([word for word in curr_tokens if word.isalnum()])
+
+            vocab_clean = sum(vocab_clean, [])
+
+            print('all jokes list length:', len(jokes_vec_clean))
+            print('vocab list length:', len(vocab_clean))
+
+            # encoding
+            sequences = []
+
+            for joke in jokes_vec_clean:
+                curr_joke = ''.join(joke)
+                if len(curr_joke.split(' ')) > 5:
+                    for i in range(5, len(curr_joke.split(' '))):
+                        seq = curr_joke.split(' ')[i-5:i+1]
+                        sequences.append(' '.join(seq))
+
+            print('sequence list size:', len(sequences))
+
+            x = []
+            y = []
+
+            for s in sequences:
+                x.append(" ".join(s.split()[:-1]))
+                y.append(" ".join(s.split()[1:]))
+
+            # create integer-to-token mapping
+            int2token = {}
+            cnt = 0
+
+            for w in set(" ".join(jokes_vec_clean).split()):
+                int2token[cnt] = w
+                cnt += 1
+
+            # create token-to-integer mapping
+            token2int = {t: i for i, t in int2token.items()}
+
+            def get_integer_seq(seq):
+                return [token2int[w] for w in seq.split()]
+
+            # convert text sequences to integer sequences
+            x_int = [get_integer_seq(i) for i in x]
+            y_int = [get_integer_seq(i) for i in y]
+
+            return x_int, y_int
+
