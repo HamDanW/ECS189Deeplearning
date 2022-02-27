@@ -636,5 +636,11 @@ class Dataset_Loader(dataset):
             x_int = [get_integer_seq(i) for i in x]
             y_int = [get_integer_seq(i) for i in y]
 
-            return x_int, y_int
+            x_int = x_int[:len(x_int) - (len(x_int) % 64)]
+            y_int = y_int[:len(y_int) - (len(y_int) % 64)]
+
+            print("x_int length:", len(x_int))
+            print("y_int length:", len(y_int))
+
+            return np.array(x_int), np.array(y_int), sequences, token2int
 

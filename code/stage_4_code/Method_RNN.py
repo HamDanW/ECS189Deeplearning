@@ -18,28 +18,48 @@ class Method_RNN(method, nn.Module):
     num_layers = 3
     num_hidden = 200
     batch_size = 1000
-    
+
 
     # CUDA
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
     # device = 'cpu'
 
-    def __init__(self, mName, mDescription, vocab_size, embedding_dim, hidden_dim, output_dim, n_layers, bidirectional=False, dropout=0):
+    def __init__(self, mName, mDescription, vocab_size=0, embedding_dim=0, hidden_dim=0, output_dim=0, n_layers=0,
+                 bidirectional=False, dropout=0):
         method.__init__(self, mName, mDescription)
         nn.Module.__init__(self)
+
+        '''
+        self.vocab_size = vocab_size
+        self.hidden_dim = hidden_dim
+        self.n_layers = n_layers
+        self.batch_size = 64
+        '''
+
+        # text generation
+        '''
+        self.embedding = nn.Embedding(vocab_size, embedding_dim).to(self.device)
+
+        self.lstm = nn.LSTM(embedding_dim, hidden_dim, num_layers=n_layers, bidirectional=bidirectional,
+                            dropout=dropout, batch_first=True).to(self.device)
+
+        self.fc = nn.Linear(hidden_dim, output_dim).to(self.device)
+
+        self.dropout = nn.Dropout(dropout).to(self.device)
+
+        self.soft = nn.Softmax(dim=1)
+
+        '''
+        # text classification
         self.embedding = ''
         self.LSTM = ''
         self.fc1 = nn.Linear(200, 2).to(self.device)
         self.drop = nn.Dropout(p=0.2).to(self.device)
         self.soft = nn.Softmax(dim=1)
 
-        self.fc = nn.Linear(hidden_dim * 2, output_dim).to(self.device)
 
-        self.dropout = nn.Dropout(dropout).to(self.device)
-
-        self.soft = nn.Softmax(dim=1)
-
-    def forward(self, x):
+    def forward(self, x, hidden=None):
         '''
         embed = self.embedding(x).to(self.device)
         dropped = self.drop(embed).to(self.device)
@@ -49,24 +69,46 @@ class Method_RNN(method, nn.Module):
         return soft
         '''
 
-        # text generation
-        # hidden layers needed to be fixed i think
+        # text classification
+
         embed = self.embedding(x).to(self.device)
-        output, (h_state, c_state) = self.rnn(embed, embed).to(self.device)
+        output, (h_state, c_state) = self.lstm(embed, embed).to(self.device)
         fc = self.fc(h_state[-1]).to(self.device)
         soft = self.soft(fc)
 
         return soft
 
+        '''
+        # text generation
+        embed = self.embedding(x).to(self.device)
+        output, hidden = self.lstm(embed, hidden)
+        output = self.dropout(output)
+        output = output.reshape(-1, self.hidden_dim)
+        fc = self.fc(output).to(self.device)
+        # soft = self.soft(fc)
+
+        # return soft, hidden
+        return fc, hidden
+        '''
+
+    def get_batches(self, arr_x, arr_y, batch_size):
+        # iterate through the arrays
+        prv = 0
+        for n in range(batch_size, arr_x.shape[0], batch_size):
+            x = arr_x[prv:n, :]
+            y = arr_y[prv:n, :]
+            prv = n
+            yield x, y
+
     def train(self, X, y):
-        #Optimizer
+        # Optimizer
         optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
-        
-        
+
         loss_function = nn.CrossEntropyLoss()
 
+        # text classification
         for epoch in range(0, self.max_epoch+1):
-            
+
             #Assume X is review
             optimizer.zero_grad()
             
@@ -80,7 +122,7 @@ class Method_RNN(method, nn.Module):
                 #miniX, miniy = torch.LongTensor(tensorX[indicies].to(self.device)).to(self.device), torch.LongTensor(tensorY[indicies].to(self.device)).to(self.device)
                 miniX, miniy = tensorX[indicies], tensorY[indicies]
 
-                y_pred = self.forward(miniX).to(self.device)
+                y_pred = self.forward(miniX)
                 y_true = miniy
 
                 # calculate the training loss
@@ -88,7 +130,7 @@ class Method_RNN(method, nn.Module):
 
                 # check here for the loss.backward doc: https://pytorch.org/docs/stable/generated/torch.Tensor.backward.html
                 # do the error backpropagation to calculate the gradients
-                    
+
                 train_loss.backward()
                 # check here for the opti.step doc: https://pytorch.org/docs/stable/optim.html
                 # update the variables according to the optimizer and the gradients calculated by the above loss.backward function
@@ -109,7 +151,39 @@ class Method_RNN(method, nn.Module):
                       'Precision: ', precision_evaluator.evaluate(), 'Recall: ', recall_evaluator.evaluate(),
                       'F1 (Micro): ', f1_evaluator.evaluate())
 
-    
+        '''
+        counter = 0
+
+        for epoch in range(self.max_epoch + 1):
+            # mini batch size of 64
+            h = (torch.Tensor(self.n_layers, self.batch_size, self.hidden_dim).zero_().to(self.device),
+                 torch.Tensor(self.n_layers, self.batch_size, self.hidden_dim).zero_().to(self.device))
+            tensorX = torch.LongTensor(np.array(X)).to(self.device)
+            tensorY = torch.LongTensor(np.array(y)).to(self.device)
+            permutation = torch.randperm(tensorX.size()[0]).to(self.device)
+
+            for x, y in self.get_batches(X, y, self.batch_size):
+                counter += 1
+                indices = permutation[counter:counter + self.batch_size].to(self.device)
+                # convert numpy arrays to pytorch tensors
+                inputs, targets = tensorX[indices], tensorY[indices]
+                # detach hidden states
+                h = tuple([each.data for each in h])
+                optimizer.zero_grad()
+                # get output from model
+                output, h = self.forward(inputs, h)
+                # calculate training loss
+                loss = loss_function(output, targets.view(-1))
+                # back propagate error
+                loss.backward()
+                # update weights
+                optimizer.step()
+
+                if counter % 10 == 0:
+                    print("Epoch: {}/{}...".format(epoch + 1, self.max_epoch),
+                          "Step: {}...".format(counter))
+        '''
+
     def test(self, X, y):
         '''
         tensor = torch.LongTensor(X).to(self.device)
@@ -131,7 +205,9 @@ class Method_RNN(method, nn.Module):
         # convert the probability distributions to the corresponding labels
         # instances will get the labels corresponding to the largest probability
         return {'pred_y': pred_results.to('cpu'), 'true_y': true_results.to('cpu')}
-    
+
+    def predict(self, tkn, h=None):
+        pass
 
     def run(self):
         print('method running...')
@@ -150,5 +226,5 @@ class Method_RNN(method, nn.Module):
         results = self.test(self.data['test']['X'], self.data['test']['y'])
         print('-----------------Testing Done-----------------')
         return results
-          
+
 
