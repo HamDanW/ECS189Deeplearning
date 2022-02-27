@@ -9,12 +9,13 @@ from code.stage_4_code.Evaluate_Precision import Evaluate_Precision
 from code.stage_4_code.Evaluate_Recall import Evaluate_Recall
 from code.stage_4_code.Evaluate_F1 import Evaluate_F1
 
+import random
 
 class Method_RNN(method, nn.Module):
     data = None
 
-    text_class = False
-    max_epoch = 200
+    text_class =True
+    max_epoch = 1000
     learning_rate = 1e-3
     num_layers = 3
     num_hidden = 200
@@ -35,7 +36,6 @@ class Method_RNN(method, nn.Module):
         self.drop = nn.Dropout(p=0.2).to(self.device)
         self.soft = nn.Softmax(dim=1)
 
-
     def forward(self, x):
         embed = self.embedding(x).to(self.device)
         dropped = self.drop(embed).to(self.device)
@@ -43,9 +43,10 @@ class Method_RNN(method, nn.Module):
         if not self.text_class:
             out = out.reshape(-1, self.num_hidden)
             fc = self.fc1(self.drop(out)).to(self.device)
+            return fc
         elif self.text_class:
             fc = self.fc1(self.drop(hidden[-1])).to(self.device)
-        soft = self.soft(fc)
+            soft = self.soft(fc)
         return soft
 
     def train(self, X, y):
@@ -56,7 +57,6 @@ class Method_RNN(method, nn.Module):
         loss_function = nn.CrossEntropyLoss()
 
         for epoch in range(0, self.max_epoch+1):
-            
             #Assume X is review
             optimizer.zero_grad()
             
@@ -80,6 +80,7 @@ class Method_RNN(method, nn.Module):
                     train_loss = loss_function(y_pred, y_true).to(self.device)
                 # check here for the loss.backward doc: https://pytorch.org/docs/stable/generated/torch.Tensor.backward.html
                 # do the error backpropagation to calculate the gradients
+
                     
                 train_loss.backward()
                 # check here for the opti.step doc: https://pytorch.org/docs/stable/optim.html
@@ -94,8 +95,6 @@ class Method_RNN(method, nn.Module):
                 f1_evaluator = Evaluate_F1('f1 (micro) training evaluator', '')
 
                 if epoch % 10 == 0:
-                    print(y_pred.shape)
-                    print(y_true.shape)
                     accuracy_evaluator.data = {'true_y': y_true.to('cpu'), 'pred_y': y_pred.to('cpu').max(1)[1]}
                     precision_evaluator.data = {'true_y': y_true.to('cpu'), 'pred_y': y_pred.to('cpu').max(1)[1]}
                     recall_evaluator.data = {'true_y': y_true.to('cpu'), 'pred_y': y_pred.to('cpu').max(1)[1]}
@@ -126,12 +125,42 @@ class Method_RNN(method, nn.Module):
         # convert the probability distributions to the corresponding labels
         # instances will get the labels corresponding to the largest probability
         return {'pred_y': pred_results.to('cpu'), 'true_y': true_results.to('cpu')}
+
+
+    def generate(self, token):
+        x = torch.LongTensor(np.array([[self.data['word2int'][token]]])).to(self.device)
+        out = self.forward(x).to(self.device)
+        out = self.soft(out).to(self.device)
+        probs = out.to('cpu')
+        probs = probs.detach().numpy()
+        probs = probs.reshape(probs.shape[1],)
+        sorted = probs.argsort()[-3:][::-1]
+        integer = sorted[random.sample([0,1,2],1)[0]]
+        #integer = np.argmax(probs)
+        return self.data['int2word'][integer]
+
+
+    def get_next(self, input, size):
+        toks = input.split()
+        # predict next token
+        for t in input.split():
+            token = self.generate(t)
+
+        toks.append(token)
+
+        # predict subsequent tokens
+        for i in range(size-1):
+            token = self.generate(toks[-1])
+            toks.append(token)
+
+        return ' '.join(toks)
     
 
     def run(self):
         print('method running...')
         #Text Classification Enabled
         if self.text_class:
+            print('Text Classification')
             #Assume input is a list of encoded sentences
             #Initalize Embedding Layer
             self.embedding = nn.Embedding(num_embeddings=len(self.data['all_words']), embedding_dim=300, padding_idx=0).to(self.device)
@@ -149,7 +178,7 @@ class Method_RNN(method, nn.Module):
             return results
         elif not self.text_class:
             print('Text Gen')
-            vocab_size = len(self.data['all_words'])
+            vocab_size = len(self.data['word2int'])
             self.num_hidden = 300
             self.embedding = nn.Embedding(num_embeddings=vocab_size, embedding_dim=300, padding_idx=0).to(self.device)
             self.LSTM = nn.LSTM(input_size=300, hidden_size=self.num_hidden, num_layers=self.num_layers, batch_first=True).to(self.device)
@@ -157,8 +186,9 @@ class Method_RNN(method, nn.Module):
             
             print('-----------------Start Training-----------------')
             trainX = self.data['X']
-            #print('Type: ' + str(np.array(trainX).dtype))
             trainY = self.data['y']
             self.train(trainX, trainY)
             print('-----------------Training Done-----------------')
+            print('Ready for the best joke ever?')
+            print(self.get_next('why did the', 10))
 

@@ -20,7 +20,7 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # change data_file_name for text_classifcation/text_generation
 data_folder_path = 'data/stage_4_data/'
-data_file_name = 'text_generation/'
+data_file_name = 'text_classification/'
 
 if data_file_name == 'text_classification/':
     data_obj = Dataset_Loader('train', '')
@@ -34,6 +34,8 @@ if data_file_name == 'text_classification/':
 
     model = Method_RNN('LSTM', '')
     model.data = input
+    model.text_class = True
+    model.max_epoch = 200
     model.to(device)
     test_results = model.run()
 
@@ -76,15 +78,17 @@ elif data_file_name == 'text_generation/':
     data_obj.dataset_source_file_name = data_file_name
 
     #Load data
-    encoded_x, encoded_y, sequences, vocab = data_obj.load()
-    input = {'X': encoded_x, 'y': encoded_y, 'all_words': vocab, 'sequences': sequences}
+    encoded_x, encoded_y, sequences, vocab, lookup = data_obj.load()
+
+    input = {'X': encoded_x, 'y': encoded_y, 'word2int': vocab, 'sequences': sequences, 'int2word': lookup}
 
     #Create Model
     model = Method_RNN('LSTM', '')
     model.data = input
     model.text_class = False
+    model.max_epoch = 1000
     model.to(device)
-    test_results = model.run()
+    model.run()
 
 
     print('Done')

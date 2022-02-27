@@ -780,6 +780,6 @@ class Dataset_Loader(dataset):
             print("x_int length:", len(x_int))
             print("y_int length:", len(y_int))
 
-            return np.array(x_int), np.array(y_int), sequences, token2int
+            return np.array(x_int), np.array(y_int), sequences, token2int, int2token
 
             
