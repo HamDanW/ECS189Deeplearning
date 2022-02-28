@@ -11,22 +11,25 @@ from code.stage_4_code.Evaluate_F1 import Evaluate_F1
 
 import random
 
+
 class Method_RNN(method, nn.Module):
     data = None
 
-    text_class =True
-    max_epoch = 1000
+    # false for text gen
+    text_class = False
+    max_epoch = 200
     learning_rate = 1e-3
     num_layers = 3
     num_hidden = 200
+    # batch_size = 1000
     batch_size = 500
 
-    #text gen
+    # text gen
     vocab_size = 0
-    
 
     # CUDA
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
     def __init__(self, mName, mDescription):
         method.__init__(self, mName, mDescription)
         nn.Module.__init__(self)
@@ -50,24 +53,23 @@ class Method_RNN(method, nn.Module):
         return soft
 
     def train(self, X, y):
-        #Optimizer
+        # Optimizer
         optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
-        
-        
+
         loss_function = nn.CrossEntropyLoss()
 
-        for epoch in range(0, self.max_epoch+1):
-            #Assume X is review
+        for epoch in range(0, self.max_epoch + 1):
+            # Assume X is review
             optimizer.zero_grad()
-            
-            #Convert input to tensor
+
+            # Convert input to tensor
             tensorX = torch.LongTensor(np.array(X)).to(self.device)
             tensorY = torch.LongTensor(np.array(y)).to(self.device)
             permutation = torch.randperm(tensorX.size()[0]).to(self.device)
 
             for i in range(0, tensorX.size()[0], self.batch_size):
-                indicies = permutation[i:i+self.batch_size].to(self.device)
-                #miniX, miniy = torch.LongTensor(tensorX[indicies].to(self.device)).to(self.device), torch.LongTensor(tensorY[indicies].to(self.device)).to(self.device)
+                indicies = permutation[i:i + self.batch_size].to(self.device)
+                # miniX, miniy = torch.LongTensor(tensorX[indicies].to(self.device)).to(self.device), torch.LongTensor(tensorY[indicies].to(self.device)).to(self.device)
                 miniX, miniy = tensorX[indicies], tensorY[indicies]
 
                 y_pred = self.forward(miniX).to(self.device)
@@ -81,7 +83,6 @@ class Method_RNN(method, nn.Module):
                 # check here for the loss.backward doc: https://pytorch.org/docs/stable/generated/torch.Tensor.backward.html
                 # do the error backpropagation to calculate the gradients
 
-                    
                 train_loss.backward()
                 # check here for the opti.step doc: https://pytorch.org/docs/stable/optim.html
                 # update the variables according to the optimizer and the gradients calculated by the above loss.backward function
@@ -98,12 +99,14 @@ class Method_RNN(method, nn.Module):
                     accuracy_evaluator.data = {'true_y': y_true.to('cpu'), 'pred_y': y_pred.to('cpu').max(1)[1]}
                     precision_evaluator.data = {'true_y': y_true.to('cpu'), 'pred_y': y_pred.to('cpu').max(1)[1]}
                     recall_evaluator.data = {'true_y': y_true.to('cpu'), 'pred_y': y_pred.to('cpu').max(1)[1]}
-                    f1_evaluator.data ={'true_y': y_true.to('cpu'), 'pred_y': y_pred.to('cpu').max(1)[1]}
+                    f1_evaluator.data = {'true_y': y_true.to('cpu'), 'pred_y': y_pred.to('cpu').max(1)[1]}
                     print('Epoch:', epoch, 'Accuracy:', accuracy_evaluator.evaluate(), 'Loss:', train_loss.item(),
-                        'Precision: ', precision_evaluator.evaluate(), 'Recall: ', recall_evaluator.evaluate(),
-                        'F1 (Micro): ', f1_evaluator.evaluate())
+                          'Precision: ', precision_evaluator.evaluate(), 'Recall: ', recall_evaluator.evaluate(),
+                          'F1 (Micro): ', f1_evaluator.evaluate())
+            else:
+                if epoch % 10 == 0:
+                    print('Epoch:', epoch, 'Loss:', train_loss.item())
 
-    
     def test(self, X, y):
         '''
         tensor = torch.LongTensor(X).to(self.device)
@@ -115,17 +118,16 @@ class Method_RNN(method, nn.Module):
         tensory = torch.LongTensor(y).to(self.device)
         permutation = torch.randperm(tensorX.size()[0]).to(self.device)
         for i in range(0, tensorX.size()[0], self.batch_size):
-            indicies = permutation[i:i+self.batch_size].to(self.device)
+            indicies = permutation[i:i + self.batch_size].to(self.device)
             miniX = tensorX[indicies]
             miniy = tensory[indicies]
             y_pred = self.forward(miniX).to(self.device)
-            true_results = torch.cat((true_results, miniy),0)
+            true_results = torch.cat((true_results, miniy), 0)
             pred_results = torch.cat((pred_results, y_pred.max(1)[1]), 0)
 
         # convert the probability distributions to the corresponding labels
         # instances will get the labels corresponding to the largest probability
         return {'pred_y': pred_results.to('cpu'), 'true_y': true_results.to('cpu')}
-
 
     def generate(self, token):
         x = torch.LongTensor(np.array([[self.data['word2int'][token]]])).to(self.device)
@@ -133,12 +135,11 @@ class Method_RNN(method, nn.Module):
         out = self.soft(out).to(self.device)
         probs = out.to('cpu')
         probs = probs.detach().numpy()
-        probs = probs.reshape(probs.shape[1],)
+        probs = probs.reshape(probs.shape[1], )
         sorted = probs.argsort()[-3:][::-1]
-        integer = sorted[random.sample([0,1,2],1)[0]]
-        #integer = np.argmax(probs)
+        integer = sorted[random.sample([0, 1, 2], 1)[0]]
+        # integer = np.argmax(probs)
         return self.data['int2word'][integer]
-
 
     def get_next(self, input, size):
         toks = input.split()
@@ -149,26 +150,27 @@ class Method_RNN(method, nn.Module):
         toks.append(token)
 
         # predict subsequent tokens
-        for i in range(size-1):
+        for i in range(size - 1):
             token = self.generate(toks[-1])
             toks.append(token)
 
         return ' '.join(toks)
-    
 
     def run(self):
         print('method running...')
-        #Text Classification Enabled
+        # Text Classification Enabled
         if self.text_class:
             print('Text Classification')
-            #Assume input is a list of encoded sentences
-            #Initalize Embedding Layer
-            self.embedding = nn.Embedding(num_embeddings=len(self.data['all_words']), embedding_dim=300, padding_idx=0).to(self.device)
-            self.LSTM = nn.LSTM(input_size=300, hidden_size=self.num_hidden, num_layers=self.num_layers, batch_first=True).to(self.device)
+            # Assume input is a list of encoded sentences
+            # Initalize Embedding Layer
+            self.embedding = nn.Embedding(num_embeddings=len(self.data['all_words']), embedding_dim=300,
+                                          padding_idx=0).to(self.device)
+            self.LSTM = nn.LSTM(input_size=300, hidden_size=self.num_hidden, num_layers=self.num_layers,
+                                batch_first=True).to(self.device)
             self.fc1 = nn.Linear(200, 2).to(self.device)
             print('-----------------Start Training-----------------')
             trainX = self.data['train']['X']
-            #print('Type: ' + str(np.array(trainX).dtype))
+            # print('Type: ' + str(np.array(trainX).dtype))
             trainY = self.data['train']['y']
             self.train(trainX, trainY)
             print('-----------------Training Done-----------------')
@@ -181,14 +183,15 @@ class Method_RNN(method, nn.Module):
             vocab_size = len(self.data['word2int'])
             self.num_hidden = 300
             self.embedding = nn.Embedding(num_embeddings=vocab_size, embedding_dim=300, padding_idx=0).to(self.device)
-            self.LSTM = nn.LSTM(input_size=300, hidden_size=self.num_hidden, num_layers=self.num_layers, batch_first=True).to(self.device)
+            self.LSTM = nn.LSTM(input_size=300, hidden_size=self.num_hidden, num_layers=self.num_layers,
+                                batch_first=True).to(self.device)
             self.fc1 = nn.Linear(300, vocab_size).to(self.device)
-            
+
             print('-----------------Start Training-----------------')
             trainX = self.data['X']
+            # print('Type: ' + str(np.array(trainX).dtype))
             trainY = self.data['y']
             self.train(trainX, trainY)
             print('-----------------Training Done-----------------')
             print('Ready for the best joke ever?')
-            print(self.get_next('why did the', 10))
-
+            print(self.get_next('why did the', 20))

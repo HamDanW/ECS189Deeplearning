@@ -716,10 +716,13 @@ class Dataset_Loader(dataset):
             jokes_vec.pop(0)
 
             jokes_vec_clean = []
+            remove_list = ["*", "`", "'", "``", "''", "(", ")", "..", "..."]
             for line in jokes_vec:
                 curr = ''
-                curr_tokens = word_tokenize(line)
-                curr += ' '.join([word for word in curr_tokens if word.isalnum()])
+                # curr_tokens = word_tokenize(line)
+                curr_tokens = line.split()
+                # curr += ' '.join([word for word in curr_tokens if word.isalnum()])
+                curr += ' '.join([word for word in curr_tokens if word not in remove_list])
                 # jokes_vec_clean.append([word for word in curr_tokens if word.isalnum()])
                 jokes_vec_clean.append(curr)
 
@@ -729,8 +732,9 @@ class Dataset_Loader(dataset):
             vocab = sorted(set(jokes_vec))
             vocab_clean = []
             for line in vocab:
-                curr_tokens = word_tokenize(line)
+                curr_tokens = line.split()
                 vocab_clean.append([word for word in curr_tokens if word.isalnum()])
+                # vocab_clean.append([word for word in curr_tokens if word not in remove_list])
 
             vocab_clean = sum(vocab_clean, [])
 
