@@ -716,7 +716,8 @@ class Dataset_Loader(dataset):
             jokes_vec.pop(0)
 
             jokes_vec_clean = []
-            remove_list = ["*", "`", "'", "``", "''", "(", ")", "..", "..."]
+            # manually remove web links (command f "http")
+            remove_list = ["*", "**", "***", "`", "'", "``", "''", "(", ")", "..", "...", ":D", ":P", ":)", "edit:", "EDIT:", "Edit:"]
             for line in jokes_vec:
                 curr = ''
                 # curr_tokens = word_tokenize(line)
@@ -743,12 +744,13 @@ class Dataset_Loader(dataset):
 
             # encoding
             sequences = []
+            seq_len = 2
 
             for joke in jokes_vec_clean:
                 curr_joke = ''.join(joke)
-                if len(curr_joke.split(' ')) > 5:
-                    for i in range(5, len(curr_joke.split(' '))):
-                        seq = curr_joke.split(' ')[i-5:i+1]
+                if len(curr_joke.split(' ')) > seq_len:
+                    for i in range(seq_len, len(curr_joke.split(' '))):
+                        seq = curr_joke.split(' ')[i-seq_len:i+1]
                         sequences.append(' '.join(seq))
 
             print('sequence list size:', len(sequences))
@@ -777,9 +779,6 @@ class Dataset_Loader(dataset):
             # convert text sequences to integer sequences
             x_int = [get_integer_seq(i) for i in x]
             y_int = [get_integer_seq(i) for i in y]
-
-            x_int = x_int[:len(x_int) - (len(x_int) % 64)]
-            y_int = y_int[:len(y_int) - (len(y_int) % 64)]
 
             print("x_int length:", len(x_int))
             print("y_int length:", len(y_int))

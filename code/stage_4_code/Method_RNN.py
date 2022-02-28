@@ -17,9 +17,10 @@ class Method_RNN(method, nn.Module):
 
     # false for text gen
     text_class = False
-    max_epoch = 200
+    max_epoch = 100
     learning_rate = 1e-3
-    num_layers = 3
+    # num_layers = 3
+    num_layers = 2
     num_hidden = 200
     # batch_size = 1000
     batch_size = 500
@@ -35,7 +36,9 @@ class Method_RNN(method, nn.Module):
         nn.Module.__init__(self)
         self.embedding = ''
         self.LSTM = ''
+        self.LSTM2 = ''
         self.fc1 = ''
+        self.fc2 = ''
         self.drop = nn.Dropout(p=0.2).to(self.device)
         self.soft = nn.Softmax(dim=1)
 
@@ -194,4 +197,23 @@ class Method_RNN(method, nn.Module):
             self.train(trainX, trainY)
             print('-----------------Training Done-----------------')
             print('Ready for the best joke ever?')
-            print(self.get_next('why did the', 20))
+            print("input + 10")
+            print(self.get_next('why did the chicken cross', 10))
+            print(self.get_next('why did the chicken cross', 10))
+            print(self.get_next('why did the chicken cross', 10))
+            print(self.get_next('why did the chicken cross', 10))
+            print(self.get_next('why did the chicken cross', 10))
+            print("input + 15")
+            print(self.get_next('why did the chicken cross', 15))
+            print(self.get_next('why did the chicken cross', 15))
+            print(self.get_next('why did the chicken cross', 15))
+            print(self.get_next('why did the chicken cross', 15))
+            print(self.get_next('why did the chicken cross', 15))
+            print("input + 20")
+            print(self.get_next('why did the chicken cross', 20))
+            print(self.get_next('why did the chicken cross', 20))
+            print(self.get_next('why did the chicken cross', 20))
+            print(self.get_next('why did the chicken cross', 20))
+            print(self.get_next('why did the chicken cross', 20))
+
+

@@ -86,7 +86,7 @@ elif data_file_name == 'text_generation/':
     model = Method_RNN('LSTM', '')
     model.data = input
     model.text_class = False
-    model.max_epoch = 200
+    model.max_epoch = 100
     model.to(device)
     model.run()
 
