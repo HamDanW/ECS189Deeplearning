@@ -70,8 +70,8 @@ if data_file_name == 'text_classification/':
     result_obj.result_destination_folder_path = result_folder_path
     result_obj.result_destination_file_name = result_folder_name
 
-
     print('Done')
+
 elif data_file_name == 'text_generation/':
     data_obj = Dataset_Loader('train', '')
     data_obj.dataset_source_folder_path = Path(data_folder_path)
@@ -86,9 +86,8 @@ elif data_file_name == 'text_generation/':
     model = Method_RNN('LSTM', '')
     model.data = input
     model.text_class = False
-    model.max_epoch = 1000
+    model.max_epoch = 100
     model.to(device)
     model.run()
-
 
     print('Done')
