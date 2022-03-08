@@ -20,7 +20,7 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 # change data_file_name for text_classifcation/text_generation
 data_folder_path = 'data/stage_4_data/'
-data_file_name = 'text_classification/'
+data_file_name = 'text_generation/'
 
 if data_file_name == 'text_classification/':
     data_obj = Dataset_Loader('train', '')

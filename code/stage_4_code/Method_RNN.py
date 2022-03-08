@@ -102,6 +102,9 @@ class Method_RNN(method, nn.Module):
                     print('Epoch:', epoch, 'Accuracy:', accuracy_evaluator.evaluate(), 'Loss:', train_loss.item(),
                         'Precision: ', precision_evaluator.evaluate(), 'Recall: ', recall_evaluator.evaluate(),
                         'F1 (Micro): ', f1_evaluator.evaluate())
+            else:
+                if epoch % 10 == 0:
+                    print('Epoch:', epoch, 'Loss:', train_loss.item())            
 
     
     def test(self, X, y):
@@ -190,5 +193,5 @@ class Method_RNN(method, nn.Module):
             self.train(trainX, trainY)
             print('-----------------Training Done-----------------')
             print('Ready for the best joke ever?')
-            print(self.get_next('why did the', 10))
+            print(self.get_next('is the horse selling tickets', 10))
 
