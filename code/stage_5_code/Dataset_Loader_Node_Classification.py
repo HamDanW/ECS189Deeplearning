@@ -77,7 +77,7 @@ class Dataset_Loader(dataset):
         elif self.dataset_name == 'pubmed':
             idx_train = range(60)
             idx_test = range(6300, 7300)
-            idx_val = range(6000, 6300)
+            idx_val = range(7400, 7700)
         #---- cora-small is a toy dataset I hand crafted for debugging purposes ---
         elif self.dataset_name == 'cora-small':
             idx_train = range(5)

@@ -16,7 +16,7 @@ torch.manual_seed(2)
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 data_folder_path = 'data/stage_5_data/'
-data_file_name = 'cora'
+data_file_name = 'pubmed'
 
 dataloader = Dataset_Loader_Node_Classification.Dataset_Loader()
 dataloader.dataset_source_folder_path = data_folder_path + data_file_name
@@ -29,14 +29,11 @@ method_obj = Method_GCN('GCN','')
 method_obj.data = data
 method_obj.dataset_name = data_file_name
 test_results = method_obj.run()
-#print(list(data['graph']['node']))
 
 # Prep results for stat
 predictions = test_results['pred_y']
 expected = test_results['true_y']
 
-#print(len(predictions))
-#print(len(expected))
 
 # Output Stat Measurements
 accuracy_evaluator = Evaluate_Accuracy('accuracy training evaluator', '')
