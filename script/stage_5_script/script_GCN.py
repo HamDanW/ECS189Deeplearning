@@ -16,7 +16,7 @@ torch.manual_seed(2)
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 data_folder_path = 'data/stage_5_data/'
-data_file_name = 'pubmed'
+data_file_name = 'cora'
 
 dataloader = Dataset_Loader_Node_Classification.Dataset_Loader()
 dataloader.dataset_source_folder_path = data_folder_path + data_file_name

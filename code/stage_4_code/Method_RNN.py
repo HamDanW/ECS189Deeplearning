@@ -1,7 +1,6 @@
 from code.base_class.method import method
 import torch
 from torch import index_put_, nn as nn
-import torch.nn.functional as F
 import numpy as np
 
 from code.stage_4_code.Evaluate_Accuracy import Evaluate_Accuracy
